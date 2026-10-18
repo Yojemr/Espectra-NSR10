@@ -5,19 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#f6f5f0" />
     <meta name="color-scheme" content="light dark" />
-    <script src="assets/theme.js?v=0.2.0"></script>
+    <script src="assets/theme.js?v=0.3.0"></script>
     <meta
       name="description"
       content="Calculadora interactiva de espectros elásticos de pseudoaceleración, pseudovelocidad y desplazamiento según la NSR-10 colombiana."
     />
     <title>Espectra · NSR-10</title>
-    <link rel="icon" href="assets/icon.svg?v=0.2.0" type="image/svg+xml" />
-    <link rel="stylesheet" href="assets/style.css?v=0.2.0" />
+    <link rel="icon" href="assets/icon.svg?v=0.3.0" type="image/svg+xml" />
+    <link rel="stylesheet" href="assets/style.css?v=0.3.0" />
     <script src="data/municipios.js" defer></script>
-    <script src="assets/engine.js?v=0.2.0" defer></script>
-    <script src="assets/cases.js?v=0.2.0" defer></script>
-    <script src="assets/charts.js?v=0.2.0" defer></script>
-    <script src="assets/app.js?v=0.2.0" defer></script>
+    <script src="assets/engine.js?v=0.3.0" defer></script>
+    <script src="assets/cases.js?v=0.3.0" defer></script>
+    <script src="assets/charts.js?v=0.3.0" defer></script>
+    <script src="assets/oscillator.js?v=0.3.0" defer></script>
+    <script src="assets/app.js?v=0.3.0" defer></script>
   </head>
   <body>
     <noscript
@@ -34,7 +35,7 @@
       >
       <span class="top-caption">DINÁMICA ESTRUCTURAL <span>/</span> COLOMBIA</span>
       <div class="top-actions">
-        <span class="version-badge">v0.2</span
+        <span class="version-badge">v0.3</span
         ><button
           type="button"
           id="theme-toggle"
@@ -378,6 +379,12 @@
                     <h4>Un grado de libertad</h4>
                     <strong id="model-period">T = 1,000 s</strong>
                     <p>Esquema ilustrativo de masa y rigidez lateral.</p>
+                    <button id="oscillator-toggle" class="animation-button" type="button">
+                      Pausar animación
+                    </button>
+                    <p id="oscillator-status" class="animation-status" role="status">
+                      Oscilación ilustrativa al período seleccionado.
+                    </p>
                   </div>
                   <svg
                     viewBox="0 0 180 90"
@@ -389,7 +396,7 @@
                     <path id="model-column-right" d="M125 77Q125 50 125 22" class="model-column" />
                     <rect id="model-mass" x="39" y="14" width="95" height="13" rx="3" />
                     <path d="M56 5h53m-4-3 4 3-4 3" class="model-arrow" /></svg
-                  ><span class="model-note">Desplazamiento ilustrativo · Sin escala</span>
+                  ><span class="model-note">Animación ilustrativa · Sin escala</span>
                 </div>
               </div>
               <details class="calculation">
@@ -532,7 +539,7 @@
     </main>
     <footer>
       <a class="footer-brand" href="./">espectra.</a
-      ><span>NSR-10 · Espectros de respuesta · Colombia · v0.2</span
+      ><span>NSR-10 · Espectros de respuesta · Colombia · v0.3</span
       ><span>Todo el cálculo ocurre en tu navegador.</span>
     </footer>
     <div id="toast" class="toast" role="status" hidden></div>

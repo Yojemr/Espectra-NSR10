@@ -1,5 +1,13 @@
 # Historial de cambios
 
+## 0.3.0 — 2026-10-18
+
+- Sustituye la deformación fija del esquema por una oscilación continua asociada al período seleccionado.
+- Incorpora controles de reproducir y pausar, límite rígido en T = 0 y ralentización explícita para períodos cortos.
+- Respeta la preferencia de movimiento reducido y suspende la animación cuando la pestaña está oculta.
+- Conserva los cálculos espectrales y la compatibilidad de casos anteriores.
+- Documenta el comportamiento y el alcance ilustrativo de la animación.
+
 ## 0.2.0 — 2026-10-18
 
 - Aviso de JavaScript al inicio de la página.

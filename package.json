@@ -1,6 +1,6 @@
 {
   "name": "espectra-nsr10",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "Espectros elásticos de respuesta de la NSR-10 colombiana",
   "engines": {

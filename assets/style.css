@@ -1783,3 +1783,31 @@ select {
     break-inside: avoid;
   }
 }
+
+.animation-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 8px 12px;
+  margin-top: 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-muted);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+.oscillator-caption .animation-status {
+  font-size: 11px;
+  line-height: 1.6;
+  margin: 10px 0 0;
+  color: var(--muted);
+  max-width: 270px;
+}
+@media print {
+  .animation-button,
+  .animation-status {
+    display: none;
+  }
+}

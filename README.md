@@ -6,7 +6,7 @@ Calculadora interactiva de los espectros elásticos generales de **pseudoacelera
 
 Funciona en GitHub Pages y abriendo `index.html` localmente. El cálculo se ejecuta en el navegador; no requiere cuenta, servidor de cálculo ni instalación.
 
-**Versión interna actual: 0.2.0**. La primera versión publicada corresponde a la versión interna 0.1.0.
+**Versión interna actual: 0.3.0**. La primera versión publicada corresponde a la versión interna 0.1.0.
 
 ## Funciones
 
@@ -44,6 +44,14 @@ Los casos de la versión interna 0.1 siguen siendo compatibles. La versión del 
 
 El CSV utiliza punto y coma como separador y punto decimal. Sus unidades son `s`, `g`, `m/s` y `m`, aunque se seleccione otra unidad de visualización. Los campos de texto protegen frente a prefijos de fórmula de hojas de cálculo.
 
+### Animación del oscilador
+
+El esquema oscila automáticamente de izquierda a derecha con un período visual asociado a `T`. **Pausar animación** y **Reproducir animación** permiten controlar el movimiento. Cambiar el período actualiza la oscilación; los cambios de tema y de unidades no la reinician.
+
+La posición ilustrativa sigue `u(t) = A sen(2πt/T)`, con amplitud gráfica fija y sin escala física. No es una integración del movimiento sísmico ni una respuesta temporal derivada del espectro. Las curvas normativas y sus valores se calculan de forma independiente.
+
+Para `T < 0,4 s` se utiliza un período visual mínimo de `0,4 s` y se indica explícitamente que el movimiento está ralentizado. En `T = 0`, el límite rígido permanece centrado. Al ocultar la pestaña se suspende el movimiento. Si el navegador solicita movimiento reducido, la animación inicia en pausa; el usuario puede reproducirla explícitamente.
+
 ## Fundamento normativo
 
 Fuente: **[NSR-10, Título A, publicado por el IDRD](https://www.idrd.gov.co/sites/default/files/documentos/Construcciones/titulo-a-nsr-100.pdf)**.
@@ -69,7 +77,7 @@ Las localidades ausentes pueden utilizar ingreso manual con una fuente documenta
 
 Los perfiles F y los sitios con microzonificación o estudio particular aplicable requieren sus propios espectros. En esos casos se detiene el cálculo general. La aplicación implementa las curvas generales de A.2.6; no genera espectros particulares ni reemplaza estudios de sitio.
 
-El oscilador es conceptual y sin escala. No representa un edificio calculado ni una historia temporal de respuesta.
+El oscilador es conceptual y sin escala. Su movimiento ilustra el período seleccionado y no representa un edificio calculado ni la historia temporal de un sismo.
 
 ### Trazabilidad
 
@@ -115,6 +123,7 @@ index.html                  Interfaz y fundamento normativo
 assets/theme.js             Preferencia y cambio de tema
 assets/engine.js            Motor numérico NSR-10
 assets/charts.js            Gráficas, selección y exportación SVG
+assets/oscillator.js        Animación ilustrativa y control de movimiento
 assets/cases.js             Validación de casos y celdas CSV
 assets/app.js               Coordinación de la interfaz
 assets/style.css            Diseño adaptable y ambos modos

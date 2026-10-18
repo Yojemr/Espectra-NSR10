@@ -3,7 +3,13 @@
   const $ = (id) => document.getElementById(id);
   const catalog = globalThis.NSR_CATALOG;
   const nsr = globalThis.NSR;
-  if (!catalog || !nsr || !globalThis.EspectraCharts || !globalThis.EspectraCases) {
+  if (
+    !catalog ||
+    !nsr ||
+    !globalThis.EspectraCharts ||
+    !globalThis.EspectraCases ||
+    !globalThis.EspectraOscillator
+  ) {
     $('app-error').hidden = false;
     $('app-error').textContent =
       'No se pudieron cargar los recursos de la aplicación. Recarga la página.';
@@ -11,6 +17,13 @@
   }
   const charts = globalThis.EspectraCharts;
   const cases = globalThis.EspectraCases;
+  const oscillator = globalThis.EspectraOscillator.create({
+    mass: $('model-mass'),
+    leftColumn: $('model-column-left'),
+    rightColumn: $('model-column-right'),
+    button: $('oscillator-toggle'),
+    status: $('oscillator-status'),
+  });
   const SOURCE = catalog.url;
   const SPECTRA = ['sa', 'sv', 'sd'];
   const TABLE_PAGE_SIZE = 40;
@@ -93,6 +106,7 @@
     };
   }
   function markInvalid(message) {
+    oscillator.setEnabled(false);
     valid = false;
     $('error-box').textContent = message;
     $('error-box').hidden = false;
@@ -126,6 +140,7 @@
       tablePage = 0;
       $('save-case').disabled = false;
       $('export-csv').disabled = false;
+      oscillator.setEnabled(true);
       valid = true;
       $('error-box').hidden = true;
       $('result-content').hidden = false;
@@ -205,13 +220,7 @@
     });
     renderSubstitution(p);
     $('model-period').textContent = `T = ${fixed(t)} s`;
-    const shift = t === 0 ? 0 : 14;
-    $('model-mass').setAttribute('x', 39 + shift);
-    $('model-column-left').setAttribute('d', `M48 77 C48 45 ${48 + shift} 47 ${48 + shift} 22`);
-    $('model-column-right').setAttribute(
-      'd',
-      `M125 77 C125 45 ${125 + shift} 47 ${125 + shift} 22`,
-    );
+    oscillator.setPeriod(t);
   }
   function renderSubstitution(point) {
     const p = current,
@@ -339,7 +348,7 @@
     return {
       schema: cases.SCHEMA,
       version: cases.SCHEMA_VERSION,
-      appVersion: '0.2.0',
+      appVersion: '0.3.0',
       mode,
       municipality: mode === 'city' ? city().code : null,
       name: mode === 'manual' ? $('manual-name').value.trim() : '',
