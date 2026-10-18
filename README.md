@@ -1,79 +1,141 @@
 # Espectra · NSR-10
 
-Aplicación estática para calcular y graficar los espectros elásticos generales de pseudoaceleración, pseudovelocidad y desplazamiento del capítulo A.2 de la NSR-10 colombiana.
+**[Abrir la aplicación →](https://yojemr.github.io/Espectra-NSR10/)** · [Repositorio](https://github.com/Yojemr/Espectra-NSR10) · [Historial de cambios](CHANGELOG.md)
 
-## Uso
+Calculadora interactiva de los espectros elásticos generales de **pseudoaceleración, pseudovelocidad y desplazamiento** del capítulo A.2 de la NSR-10 colombiana, como funciones del período de vibración.
 
-Abrir `index.html` en un navegador moderno. No requiere instalación, servidor, cuenta ni conexión para calcular. También funciona cuando se publica en GitHub Pages.
+Funciona en GitHub Pages y abriendo `index.html` localmente. El cálculo se ejecuta en el navegador; no requiere cuenta, servidor de cálculo ni instalación.
 
-1. Seleccionar departamento y municipio o utilizar **Ingreso manual**, indicando sitio y fuente de los parámetros.
-2. Definir perfil de suelo y grupo de uso. Los factores de sitio se interpolan automáticamente.
-3. Consultar las tres gráficas y seleccionar un período mediante el deslizador, el campo numérico o un punto de la curva.
-4. Exportar datos CSV, descargar gráficas SVG o guardar un caso JSON para abrirlo después.
+**Versión interna actual: 0.2.0**. La primera versión publicada corresponde a la versión interna 0.1.0.
 
-La pantalla inicial corresponde a un ejemplo editable: Medellín, perfil D y grupo de uso I. Los archivos de caso guardan entradas; al abrirlos se recalculan los resultados.
+## Funciones
 
-## Base de cálculo
+- Catálogo de localidades de la NSR-10 e ingreso manual de parámetros.
+- Cálculo de factores de sitio, importancia y períodos de transición.
+- Tres gráficas sincronizadas, consulta por período y sustitución numérica.
+- Guardado y apertura de casos, exportación CSV y gráficas SVG.
+- Modos claro y oscuro, con controles y gráficas adaptados al tema.
+- Interfaz adaptable y oscilador conceptual de un grado de libertad.
 
-- Amenaza municipal: Apéndice A-4, páginas A-153 a A-174.
-- Coeficientes de sitio: tablas A.2.4-3 y A.2.4-4. Interpolación lineal por Aa para Fa y por Av para Fv; se conservan los valores extremos de las tablas fuera de sus intervalos intermedios.
-- Importancia: tabla A.2.5-1.
-- Espectros: ecuaciones A.2.6-1 a A.2.6-15; amortiguamiento del 5 % del crítico.
-- Espectro general con meseta inicial; opción de tramo inicial reducido exclusivamente para modos distintos del fundamental.
-- Sa en fracción de g, Sv en m/s y Sd en m. Conversión de visualización: g = 9,80665 m/s².
+## Guía de uso
 
-Se evalúa cada espectro con sus coeficientes normativos. Los pequeños saltos en Sv y Sd en TC se conservan; no se fuerza continuidad ni identidad algebraica entre expresiones redondeadas. Se utiliza la rama izquierda en las fronteras TC y TL. En T = 0 se evalúan directamente los límites finitos de la rama inicial.
+1. **Define el sitio.** Selecciona departamento y municipio. Se cargan `Aa` y `Av`. En **Ingreso manual**, introduce el sitio, sus parámetros y la fuente.
+2. **Define las condiciones.** Selecciona perfil de suelo y grupo de uso. Se calculan `Fa`, `Fv` e `I`.
+3. **Explora los espectros.** Selecciona un período desde la gráfica, el deslizador o el campo numérico. Consulta sus tres ordenadas y la sustitución numérica.
+4. **Conserva el trabajo.** Usa **Guardar caso**, **Abrir caso** o **Datos CSV** en la barra destacada. Cada gráfica tiene su propia descarga SVG.
 
-El espectro se presenta sin reducción por R. El esquema de un grado de libertad es ilustrativo y no representa un edificio calculado ni una respuesta temporal.
+El ejemplo inicial corresponde a **Medellín, perfil D y grupo I**. Es un caso editable de demostración.
 
-## Cobertura de los datos
+En **Configuración del espectro** puedes modificar el período máximo, el paso de la tabla y el tramo inicial para modos superiores. Esta última opción corresponde exclusivamente a modos distintos del fundamental de la dirección analizada.
 
-El catálogo contiene **1.117 localidades únicas** del documento normativo, en 32 departamentos y Bogotá, D. C. Los parámetros de Bogotá aparecen dos veces con idénticos valores; se conserva un único registro y se registran ambas páginas en los datos. Los nombres y códigos mantienen la nomenclatura del documento, que no equivale al catálogo administrativo actual. Las localidades ausentes pueden utilizar ingreso manual con una fuente documentada; no se atribuyen parámetros por proximidad.
+### Apariencia
 
-Los perfiles F y los sitios con microzonificación o estudio particular aplicable requieren sus espectros específicos. La aplicación detiene el cálculo general en esos casos; no genera curvas particulares ni sustituye estudios de sitio.
+El primer acceso respeta la preferencia del sistema. El control de la cabecera permite cambiar de modo y recordar la elección en el almacenamiento local. Si el navegador restringe ese almacenamiento, el cambio sigue funcionando durante la sesión. Cambiar el tema no modifica las entradas ni los resultados.
 
-Fuente normativa: [NSR-10, Título A, publicación del IDRD](https://www.idrd.gov.co/sites/default/files/documentos/Construcciones/titulo-a-nsr-100.pdf).
+### Archivos
 
-SHA-256 del PDF usado para extraer los datos: `8a266a10938bbd91001cf1220d1c3503b0b7eecfa23f6d38a1bbc8685cda565f`.
+| Formato | Contenido                                 | Uso                                               |
+| ------- | ----------------------------------------- | ------------------------------------------------- |
+| JSON    | Entradas, unidades y período seleccionado | Reabrir el caso y recalcularlo                    |
+| CSV     | Ordenadas, parámetros, sitio y fuente     | Analizar los resultados en una hoja de cálculo    |
+| SVG     | Gráfica vectorial en el tema seleccionado | Insertar o editar la figura sin perder resolución |
 
-## Estructura
+Los casos de la versión interna 0.1 siguen siendo compatibles. La versión del formato JSON se mantiene en `1`, independientemente de la versión de la aplicación. Los archivos se validan antes de modificar las entradas actuales.
+
+El CSV utiliza punto y coma como separador y punto decimal. Sus unidades son `s`, `g`, `m/s` y `m`, aunque se seleccione otra unidad de visualización. Los campos de texto protegen frente a prefijos de fórmula de hojas de cálculo.
+
+## Fundamento normativo
+
+Fuente: **[NSR-10, Título A, publicado por el IDRD](https://www.idrd.gov.co/sites/default/files/documentos/Construcciones/titulo-a-nsr-100.pdf)**.
+
+| Componente                                          | Referencia                          |
+| --------------------------------------------------- | ----------------------------------- |
+| `Aa`, `Av` y amenaza municipal                      | Apéndice A-4, páginas A-153 a A-174 |
+| Factores de sitio `Fa` y `Fv`                       | Tablas A.2.4-3 y A.2.4-4            |
+| Coeficiente de importancia `I`                      | Tabla A.2.5-1                       |
+| Pseudoaceleración, pseudovelocidad y desplazamiento | A.2.6.1, A.2.6.2 y A.2.6.3          |
+
+Se conservan las expresiones y coeficientes de las ecuaciones A.2.6-1 a A.2.6-15, para **5 % del amortiguamiento crítico**, sin reducción por `R`. `Fa` se interpola por `Aa` y `Fv` por `Av`; se aplican las columnas extremas fuera de los intervalos intermedios de las tablas.
+
+Cada espectro se evalúa por separado. Los coeficientes redondeados producen pequeños saltos en `Sv` y `Sd` en `TC`; no se fuerza continuidad ni identidad algebraica exacta entre curvas. Se usa la rama izquierda en `TC` y `TL`. En `T = 0` se evalúan los límites finitos de la rama inicial.
+
+`Sa` se expresa como fracción de `g`; su conversión a `m/s²` utiliza `g = 9,80665 m/s²`. `Sv` se expresa en `m/s` y `Sd` en `m`.
+
+### Cobertura y alcance
+
+El catálogo contiene **1.117 localidades únicas** de 32 departamentos y Bogotá, D. C. Los nombres y códigos corresponden al documento normativo y no a una actualización administrativa. Bogotá aparece dos veces con idénticos parámetros; se conserva una entrada y se registran ambas páginas de origen.
+
+Las localidades ausentes pueden utilizar ingreso manual con una fuente documentada. No se atribuyen parámetros por proximidad.
+
+Los perfiles F y los sitios con microzonificación o estudio particular aplicable requieren sus propios espectros. En esos casos se detiene el cálculo general. La aplicación implementa las curvas generales de A.2.6; no genera espectros particulares ni reemplaza estudios de sitio.
+
+El oscilador es conceptual y sin escala. No representa un edificio calculado ni una historia temporal de respuesta.
+
+### Trazabilidad
+
+Cada registro incluye código, parámetros y página de origen. La extracción compara `pypdf` y `pdfplumber`, verifica códigos y amenaza, y deduplica únicamente registros idénticos.
+
+SHA-256 del PDF de 186 páginas utilizado:
 
 ```text
-index.html                 Interfaz y fundamento normativo
-assets/style.css           Diseño adaptable
-assets/engine.js           Motor numérico independiente
-assets/app.js              Interacción, gráficas y exportaciones
-data/municipios.js         Datos del Apéndice A-4 con referencia por fila
-tests/engine.test.cjs      Verificación numérica y de cobertura
-tools/extract_catalog.py   Extracción reproducible y contraste de lectores PDF
+8a266a10938bbd91001cf1220d1c3503b0b7eecfa23f6d38a1bbc8685cda565f
 ```
 
-## Verificación
+## Desarrollo local
 
-Con Node.js 22 o posterior:
+Para utilizar la aplicación basta abrir `index.html`. Para trabajar mediante HTTP:
 
-```text
-node --test tests/engine.test.cjs
-```
-
-Las pruebas incluyen un caso manual de control, interpolaciones, límites, modos superiores, escalamiento por importancia, relaciones físicas con tolerancia de redondeo, errores de entrada y todas las combinaciones de localidad, perfil A–E y grupo de uso I–IV.
-
-Para reconstruir el catálogo desde el PDF de 186 páginas, con Python, pypdf y pdfplumber:
-
-```text
-python tools/extract_catalog.py ruta/al/titulo-a-nsr-100.pdf
-```
-
-La extracción compara códigos y parámetros de ambas bibliotecas, verifica amenazas y deduplica únicamente registros idénticos.
-
-## GitHub Pages
-
-Publicar el contenido del proyecto en la raíz de un repositorio. En **Settings → Pages**, seleccionar **Deploy from a branch**, la rama correspondiente y la carpeta **/(root)**. El archivo `.nojekyll` permite servir directamente los recursos estáticos. Todas las rutas internas son relativas y funcionan bajo la ruta de un repositorio.
-
-Para una vista previa mediante HTTP:
-
-```text
+```sh
 python -m http.server 8765 --bind 127.0.0.1
 ```
 
-Abrir `http://127.0.0.1:8765`. Las dependencias de desarrollo no forman parte de la aplicación publicada.
+Abrir [localhost:8765](http://127.0.0.1:8765/).
+
+Las herramientas de desarrollo requieren **Node.js 22 o posterior** y npm. Las dependencias de desarrollo no se cargan en la aplicación publicada.
+
+```sh
+npm ci --ignore-scripts
+npm test
+npm run check
+npm run format:check
+```
+
+Para aplicar el formato uniforme:
+
+```sh
+npm run format
+```
+
+La verificación continua ejecuta las pruebas, las comprobaciones de integridad y el formato en cada actualización y solicitud de cambios.
+
+### Organización
+
+```text
+index.html                  Interfaz y fundamento normativo
+assets/theme.js             Preferencia y cambio de tema
+assets/engine.js            Motor numérico NSR-10
+assets/charts.js            Gráficas, selección y exportación SVG
+assets/cases.js             Validación de casos y celdas CSV
+assets/app.js               Coordinación de la interfaz
+assets/style.css            Diseño adaptable y ambos modos
+data/municipios.js          Catálogo normativo con trazabilidad
+tests/                      Pruebas numéricas y de casos
+tools/check_source.cjs      Integridad de HTML, recursos y sintaxis
+tools/extract_catalog.py    Extracción reproducible del catálogo
+```
+
+Para regenerar el catálogo, con Python, `pypdf` y `pdfplumber`:
+
+```sh
+python tools/extract_catalog.py ruta/al/titulo-a-nsr-100.pdf
+```
+
+El archivo generado se mantiene fuera del formateador para conservar su reproducibilidad.
+
+## Publicación
+
+Sitio desplegado: **[yojemr.github.io/Espectra-NSR10](https://yojemr.github.io/Espectra-NSR10/)**.
+
+GitHub Pages publica la raíz de `main`. El archivo `.nojekyll` permite servir directamente los recursos y las rutas internas son relativas. Cada cambio en `main` genera un nuevo despliegue, cuyo estado se consulta en **Actions → pages build and deployment**.
+
+El cálculo y los archivos de casos se procesan en el navegador. La preferencia de tema se conserva localmente cuando está permitido.

@@ -1,0 +1,18 @@
+{
+  "name": "espectra-nsr10",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Espectros elásticos de respuesta de la NSR-10 colombiana",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "node tools/check_source.cjs"
+  },
+  "devDependencies": {
+    "prettier": "3.6.2"
+  }
+}

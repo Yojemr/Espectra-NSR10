@@ -1,71 +1,540 @@
 <!doctype html>
 <html lang="es">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#163d35">
-  <meta name="description" content="Calculadora interactiva de espectros elásticos de pseudoaceleración, pseudovelocidad y desplazamiento según la NSR-10 colombiana.">
-  <title>Espectra · NSR-10</title>
-  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/style.css">
-  <script src="data/municipios.js" defer></script>
-  <script src="assets/engine.js" defer></script>
-  <script src="assets/app.js" defer></script>
-</head>
-<body>
-  <a class="skip" href="#workspace">Ir a los espectros</a>
-  <header class="topbar">
-    <a class="brand" href="./" aria-label="Espectra, inicio"><svg viewBox="0 0 34 34" aria-hidden="true"><path d="M3 25h5l5-18 6 21 5-13 3 10h5"/></svg><span>espectra<span class="brand-dot">.</span></span></a>
-    <span class="top-caption">DINÁMICA ESTRUCTURAL <span>/</span> COLOMBIA</span>
-    <a class="code-link" href="#fundamento">NSR-10 <span>↗</span></a>
-  </header>
-  <main>
-    <section class="intro">
-      <div><p class="eyebrow">LABORATORIO DE RESPUESTA SÍSMICA</p><h1>El sitio define el espectro.<br><span>Explora su respuesta.</span></h1><p class="intro-copy">Pseudoaceleración, pseudovelocidad y desplazamiento.<br>Las tres perspectivas de un mismo movimiento de diseño.</p></div>
-      <div class="intro-note"><span class="live-dot"></span><span>ESPECTROS ELÁSTICOS</span><strong>NSR-10 / A.2.6</strong><p>Amortiguamiento: 5 % del crítico<br>Expresiones normativas por tramos</p></div>
-    </section>
-    <div class="workspace" id="workspace">
-      <aside class="inputs panel" aria-label="Datos de entrada">
-        <div class="panel-heading"><span class="step">01</span><h2>Define el sitio</h2><span class="small-tag">ENTRADAS</span></div>
-        <form id="parameters-form" novalidate>
-          <div class="segmented" aria-label="Origen de los parámetros"><button class="active" id="mode-city" type="button" aria-pressed="true">Por municipio</button><button id="mode-manual" type="button" aria-pressed="false">Ingreso manual</button></div>
-          <div id="city-fields">
-            <label for="department">Departamento / distrito</label><select id="department"></select>
-            <label for="city-search">Buscar municipio</label><div class="search-wrap"><span aria-hidden="true">⌕</span><input id="city-search" type="search" placeholder="Nombre o código…" autocomplete="off"></div>
-            <label for="municipality">Municipio <span id="city-count" class="label-note"></span></label><select id="municipality"></select>
-            <p id="catalog-reference" class="field-note"></p>
-          </div>
-          <div id="manual-fields" hidden><label for="manual-name">Nombre del sitio</label><input id="manual-name" type="text" maxlength="100" placeholder="Municipio o ubicación"><label for="manual-source">Fuente de los parámetros</label><input id="manual-source" type="text" maxlength="240" placeholder="Tabla, página o estudio de referencia"></div>
-          <div class="field-row"><div><label for="aa">A<sub>a</sub> <span class="label-note">adimensional</span></label><input id="aa" type="number" min="0.001" step="0.01" value="0.15" readonly></div><div><label for="av">A<sub>v</sub> <span class="label-note">adimensional</span></label><input id="av" type="number" min="0.001" step="0.01" value="0.20" readonly></div></div>
-          <div class="form-divider"></div>
-          <label for="soil">Perfil de suelo</label><select id="soil"><option value="A">A · Roca competente</option><option value="B">B · Roca de rigidez media</option><option value="C">C · Suelo muy denso / roca blanda</option><option value="D" selected>D · Suelo rígido</option><option value="E">E · Suelo blando</option><option value="F">F · Estudio particular de sitio</option></select>
-          <label for="group">Grupo de uso</label><select id="group"><option value="I">I · Ocupación normal</option><option value="II">II · Ocupación especial</option><option value="III">III · Atención a la comunidad</option><option value="IV">IV · Edificaciones indispensables</option></select>
-          <div class="factors"><div><span>F<sub>a</sub></span><strong id="fa-value">—</strong></div><div><span>F<sub>v</sub></span><strong id="fv-value">—</strong></div><div><span>I</span><strong id="importance-value">—</strong></div></div>
-          <label class="checkbox"><input id="particular" type="checkbox"><span>Aplica microzonificación o estudio particular</span></label>
-          <details class="advanced"><summary>Configuración del espectro <span>+</span></summary><label for="max-period">Período máximo <span class="label-note">s</span></label><input id="max-period" type="number" min="0.1" max="100" step="0.1" value="6"><label for="sample-step">Paso de la tabla <span class="label-note">s</span></label><select id="sample-step"><option value="0.01">0,01 s</option><option value="0.02">0,02 s</option><option value="0.05">0,05 s</option><option value="0.1">0,10 s</option></select><label class="checkbox"><input id="higher-modes" type="checkbox"><span>Tramo inicial para modos superiores</span></label><p class="field-note">A.2.6.1.3, A.2.6.2.3 y A.2.6.3.3. Solo para modos distintos del fundamental de la dirección analizada.</p></details>
-          <button class="primary-button" type="submit">Actualizar espectros <span aria-hidden="true">↗</span></button><button id="reset" type="button" class="text-button">Restablecer ejemplo</button>
-        </form>
-        <div class="catalog-footer"><span class="tiny-grid" aria-hidden="true">▦</span><p><strong id="catalog-total">Catálogo NSR-10</strong><br>Apéndice A-4 · Datos integrados</p></div>
-      </aside>
-      <section class="results" aria-label="Resultados del espectro">
-        <div id="error-box" class="error-box" role="alert" hidden></div>
-        <div class="results-head"><div><p class="eyebrow">02 / RESPUESTA DEL SITIO</p><h2 id="site-name">Medellín, Antioquia</h2></div><span class="example-tag" id="case-tag">EJEMPLO EDITABLE</span></div>
-        <div class="site-meta"><span id="hazard-badge" class="hazard-badge">Amenaza intermedia</span><span id="site-summary">Perfil D · Grupo I · ξ = 5 %</span><span class="meta-separator">/</span><span id="source-summary">Apéndice A-4</span></div>
-        <div class="period-cards"><div><span>T<sub>0</sub> <small>INICIO</small></span><strong id="t0-value">—</strong></div><div><span>T<sub>C</sub> <small>TRANSICIÓN</small></span><strong id="tc-value">—</strong></div><div><span>T<sub>L</sub> <small>PERÍODO LARGO</small></span><strong id="tl-value">—</strong></div><div class="elastic-card"><span>MODELO</span><strong>Elástico <small>5 %</small></strong></div></div>
-        <div id="result-content">
-          <div class="chart-panel panel"><div class="chart-heading"><div class="chart-title"><span class="curve-dot sa-dot"></span><h3>Pseudoaceleración</h3><span class="symbol">S<sub>a</sub></span></div><div class="chart-tools"><select id="accel-unit" aria-label="Unidad de pseudoaceleración"><option value="g">g</option><option value="ms2">m/s²</option></select><button type="button" class="icon-button" data-download="sa" aria-label="Descargar gráfica de pseudoaceleración" title="Descargar SVG">↓</button></div></div><div id="chart-sa" class="chart" data-key="sa"></div></div>
-          <div class="secondary-charts"><div class="chart-panel panel"><div class="chart-heading"><div class="chart-title"><span class="curve-dot sv-dot"></span><h3>Pseudovelocidad</h3><span class="symbol">S<sub>v</sub></span></div><div class="chart-tools"><span class="unit">m/s</span><button type="button" class="icon-button" data-download="sv" aria-label="Descargar gráfica de pseudovelocidad" title="Descargar SVG">↓</button></div></div><div id="chart-sv" class="chart" data-key="sv"></div></div><div class="chart-panel panel"><div class="chart-heading"><div class="chart-title"><span class="curve-dot sd-dot"></span><h3>Desplazamiento</h3><span class="symbol">S<sub>d</sub></span></div><div class="chart-tools"><select id="displ-unit" aria-label="Unidad de desplazamiento"><option value="m">m</option><option value="cm">cm</option><option value="mm">mm</option></select><button type="button" class="icon-button" data-download="sd" aria-label="Descargar gráfica de desplazamiento" title="Descargar SVG">↓</button></div></div><div id="chart-sd" class="chart" data-key="sd"></div></div></div>
-          <div class="chart-legend"><span><i class="legend-line"></i>Espectro normativo</span><span><i class="legend-dash"></i>Períodos de transición</span><span>Selecciona un punto para consultarlo</span></div>
-          <section class="inspector panel" aria-label="Consulta por período"><div class="inspector-top"><div><p class="eyebrow">03 / EXPLORA UN PERÍODO</p><h3 id="branch-name">Aceleración constante</h3></div><label class="period-input" for="selected-period">T <input id="selected-period" type="number" min="0" max="6" step="0.01" value="1.00"> s</label></div><input id="period-slider" type="range" min="0" max="6" value="1" step="0.001" aria-label="Período de consulta"><div class="inspection-grid"><div class="readout sa-text"><span>S<sub>a</sub></span><strong id="sa-readout">—</strong><small id="sa-equation">—</small></div><div class="readout sv-text"><span>S<sub>v</sub></span><strong id="sv-readout">—</strong><small id="sv-equation">—</small></div><div class="readout sd-text"><span>S<sub>d</sub></span><strong id="sd-readout">—</strong><small id="sd-equation">—</small></div><div class="oscillator"><svg viewBox="0 0 180 90" role="img" aria-label="Oscilador ilustrativo de un grado de libertad"><path d="M20 77h140M33 77V24M140 77V24" class="model-ground"/><path id="model-column-left" d="M48 77Q48 50 48 22" class="model-column"/><path id="model-column-right" d="M125 77Q125 50 125 22" class="model-column"/><rect id="model-mass" x="39" y="14" width="95" height="13" rx="3"/><path d="M56 5h53m-4-3 4 3-4 3" class="model-arrow"/></svg><span>Oscilador de 1 GDL · Esquema</span></div></div><details class="calculation"><summary>Ver sustitución numérica <span>↗</span></summary><div id="substitution"></div></details></section>
-          <details class="table-section panel"><summary><span>Tabla de ordenadas <small id="sample-count"></small></span><span>+</span></summary><div class="table-scroll"><table><thead><tr><th>T (s)</th><th>S<sub>a</sub> (g)</th><th>S<sub>v</sub> (m/s)</th><th>S<sub>d</sub> (m)</th><th>Tramo</th></tr></thead><tbody id="spectrum-table"></tbody></table></div><div class="table-pagination"><button type="button" id="table-prev">← Anterior</button><span id="table-page"></span><button type="button" id="table-next">Siguiente →</button></div></details>
-          <div class="export-bar"><span>Conserva tu caso y sus resultados.</span><div><button type="button" id="export-csv" class="outline-button">↓ Datos CSV</button><button type="button" id="save-case" class="outline-button">↓ Guardar caso</button><button type="button" id="load-case" class="outline-button">↑ Abrir caso</button><input type="file" id="case-file" accept=".json,application/json" hidden></div></div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f6f5f0" />
+    <meta name="color-scheme" content="light dark" />
+    <script src="assets/theme.js"></script>
+    <meta
+      name="description"
+      content="Calculadora interactiva de espectros elásticos de pseudoaceleración, pseudovelocidad y desplazamiento según la NSR-10 colombiana."
+    />
+    <title>Espectra · NSR-10</title>
+    <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="assets/style.css" />
+    <script src="data/municipios.js" defer></script>
+    <script src="assets/engine.js" defer></script>
+    <script src="assets/cases.js" defer></script>
+    <script src="assets/charts.js" defer></script>
+    <script src="assets/app.js" defer></script>
+  </head>
+  <body>
+    <noscript
+      ><div class="js-notice" role="alert">
+        <strong>Activa JavaScript para utilizar Espectra.</strong
+        ><span>El cálculo y las gráficas necesitan JavaScript habilitado en tu navegador.</span>
+      </div></noscript
+    >
+    <a class="skip" href="#workspace">Ir a los espectros</a>
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Espectra, inicio"
+        ><svg viewBox="0 0 34 34" aria-hidden="true"><path d="M3 25h5l5-18 6 21 5-13 3 10h5" /></svg
+        ><span>espectra<span class="brand-dot">.</span></span></a
+      >
+      <span class="top-caption">DINÁMICA ESTRUCTURAL <span>/</span> COLOMBIA</span>
+      <div class="top-actions">
+        <span class="version-badge">v0.2</span
+        ><button
+          type="button"
+          id="theme-toggle"
+          class="theme-toggle"
+          aria-label="Activar modo oscuro"
+          aria-pressed="false"
+          hidden
+        >
+          <svg class="theme-icon moon-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z" /></svg
+          ><svg class="theme-icon sun-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="4" />
+            <path
+              d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"
+            /></svg
+          ><span id="theme-label">Modo oscuro</span></button
+        ><a class="code-link" href="#fundamento">NSR-10 <span aria-hidden="true">↗</span></a>
+      </div>
+    </header>
+    <main>
+      <div id="app-error" class="error-box" role="alert" hidden></div>
+      <section class="intro">
+        <div>
+          <p class="eyebrow">LABORATORIO DE RESPUESTA SÍSMICA</p>
+          <h1>El sitio define el espectro.<br /><span>Explora su respuesta.</span></h1>
+          <p class="intro-copy">
+            Pseudoaceleración, pseudovelocidad y desplazamiento.<br />Las tres perspectivas de un
+            mismo movimiento de diseño.
+          </p>
+        </div>
+        <div class="intro-note">
+          <span class="live-dot"></span><span>ESPECTROS ELÁSTICOS</span
+          ><strong>NSR-10 / A.2.6</strong>
+          <p>Amortiguamiento: 5 % del crítico<br />Expresiones normativas por tramos</p>
         </div>
       </section>
-    </div>
-    <section class="foundation" id="fundamento"><div class="foundation-intro"><p class="eyebrow">EL CÁLCULO, A LA VISTA</p><h2>Fundamento normativo</h2><p>Espectros elásticos generales de diseño horizontal de la NSR-10. Se conservan las expresiones y los coeficientes de cada magnitud.</p><a href="https://www.idrd.gov.co/sites/default/files/documentos/Construcciones/titulo-a-nsr-100.pdf#page=38" target="_blank" rel="noopener">Consultar Título A · Fuente IDRD ↗</a></div><div class="foundation-body"><details open><summary>Parámetros y períodos <span>−</span></summary><p>F<sub>a</sub> y F<sub>v</sub>: tablas A.2.4-3 y A.2.4-4, interpolación lineal para valores intermedios de A<sub>a</sub> y A<sub>v</sub>, respectivamente. I: tabla A.2.5-1.</p><div class="formula-strip"><span class="period-formula">T<sub>0</sub> = 0,10 AᵥFᵥ / AₐFₐ</span><span class="period-formula">T<sub>C</sub> = 0,48 AᵥFᵥ / AₐFₐ</span><span class="period-formula">T<sub>L</sub> = 2,4 Fᵥ</span></div></details><details><summary>Expresiones de los tres espectros <span>+</span></summary><div class="table-scroll"><table class="formula-table"><thead><tr><th>Magnitud</th><th>0 ≤ T ≤ T<sub>C</sub></th><th>T<sub>C</sub> &lt; T ≤ T<sub>L</sub></th><th>T &gt; T<sub>L</sub></th></tr></thead><tbody><tr><td>Sₐ (g)</td><td>2,5 AₐFₐI</td><td>1,2 AᵥFᵥI / T</td><td>1,2 AᵥFᵥT<sub>L</sub>I / T²</td></tr><tr><td>Sᵥ (m/s)</td><td>3,9 AₐFₐIT</td><td>1,87 AᵥFᵥI</td><td>1,87 AᵥFᵥIT<sub>L</sub> / T</td></tr><tr><td>S<sub>d</sub> (m)</td><td>0,62 AₐFₐIT²</td><td>0,30 AᵥFᵥIT</td><td>0,30 AᵥFᵥIT<sub>L</sub></td></tr></tbody></table></div><p>A.2.6.1 a A.2.6.3. Los coeficientes redondeados del reglamento producen pequeños saltos en T<sub>C</sub> para Sᵥ y S<sub>d</sub>. Las gráficas conservan esos valores.</p><p>En el modo para períodos inferiores a T₀ de modos distintos del fundamental, cada expresión inicial se multiplica por (0,4 + 0,6 T/T₀), conforme a A.2.6-7, A.2.6-11 y A.2.6-15.</p></details><details><summary>Unidades y significado de las curvas <span>+</span></summary><p>Sₐ se expresa como fracción de g; su conversión a m/s² usa g = 9,80665 m/s². Sᵥ se expresa en m/s y S<sub>d</sub> en m. Para T &gt; 0, las relaciones de un oscilador elástico son PSV = ωS<sub>d</sub> y PSA = ω²S<sub>d</sub>, con ω = 2π/T. Las expresiones normativas usan coeficientes redondeados y no satisfacen estas conversiones de forma idéntica.</p><p>Las curvas representan máximos espectrales para distintos períodos; no describen una historia temporal. El esquema de 1 GDL es ilustrativo y no representa un edificio calculado. El espectro elástico se presenta sin reducción por R.</p></details><details><summary>Catálogo y condiciones particulares <span>+</span></summary><p id="catalog-method"></p><p>Los nombres y códigos corresponden al documento normativo, no a una actualización de la división administrativa. Para una localidad no incluida, utiliza ingreso manual y documenta la fuente de Aₐ y Aᵥ; no se asignan parámetros por proximidad.</p><p>Los perfiles F requieren estudio particular (A.2.10). Si existe microzonificación o estudio aplicable, deben emplearse sus movimientos de diseño según A.2.1.2 y A.2.9. Esta aplicación calcula las curvas generales de A.2.6 y no genera los espectros particulares de esos estudios.</p></details></div></section>
-  </main>
-  <footer><a class="footer-brand" href="./">espectra.</a><span>NSR-10 · Espectros de respuesta · Colombia</span><span>Todo el cálculo ocurre en tu navegador.</span></footer>
-  <div id="toast" class="toast" role="status" hidden></div>
-  <noscript><p class="error-box">Activa JavaScript para calcular y visualizar los espectros.</p></noscript>
-</body>
+      <div class="workspace" id="workspace">
+        <aside class="inputs panel" aria-label="Datos de entrada">
+          <div class="panel-heading">
+            <span class="step">01</span>
+            <h2>Define el sitio</h2>
+            <span class="small-tag">ENTRADAS</span>
+          </div>
+          <form id="parameters-form" novalidate>
+            <div class="segmented" aria-label="Origen de los parámetros">
+              <button class="active" id="mode-city" type="button" aria-pressed="true">
+                Por municipio</button
+              ><button id="mode-manual" type="button" aria-pressed="false">Ingreso manual</button>
+            </div>
+            <div id="city-fields">
+              <label for="department">Departamento / distrito</label
+              ><select id="department"></select>
+              <label for="city-search">Buscar municipio</label>
+              <div class="search-wrap">
+                <span aria-hidden="true">⌕</span
+                ><input
+                  id="city-search"
+                  type="search"
+                  placeholder="Nombre o código…"
+                  autocomplete="off"
+                />
+              </div>
+              <label for="municipality"
+                >Municipio <span id="city-count" class="label-note"></span></label
+              ><select id="municipality"></select>
+              <p id="catalog-reference" class="field-note"></p>
+            </div>
+            <div id="manual-fields" hidden>
+              <label for="manual-name">Nombre del sitio</label
+              ><input
+                id="manual-name"
+                type="text"
+                maxlength="100"
+                placeholder="Municipio o ubicación"
+              /><label for="manual-source">Fuente de los parámetros</label
+              ><input
+                id="manual-source"
+                type="text"
+                maxlength="240"
+                placeholder="Tabla, página o estudio de referencia"
+              />
+            </div>
+            <div class="field-row">
+              <div>
+                <label for="aa">A<sub>a</sub> <span class="label-note">adimensional</span></label
+                ><input id="aa" type="number" min="0.001" step="0.01" value="0.15" readonly />
+              </div>
+              <div>
+                <label for="av">A<sub>v</sub> <span class="label-note">adimensional</span></label
+                ><input id="av" type="number" min="0.001" step="0.01" value="0.20" readonly />
+              </div>
+            </div>
+            <div class="form-divider"></div>
+            <label for="soil">Perfil de suelo</label
+            ><select id="soil">
+              <option value="A">A · Roca competente</option>
+              <option value="B">B · Roca de rigidez media</option>
+              <option value="C">C · Suelo muy denso / roca blanda</option>
+              <option value="D" selected>D · Suelo rígido</option>
+              <option value="E">E · Suelo blando</option>
+              <option value="F">F · Estudio particular de sitio</option>
+            </select>
+            <label for="group">Grupo de uso</label
+            ><select id="group">
+              <option value="I">I · Ocupación normal</option>
+              <option value="II">II · Ocupación especial</option>
+              <option value="III">III · Atención a la comunidad</option>
+              <option value="IV">IV · Edificaciones indispensables</option>
+            </select>
+            <div class="factors">
+              <div>
+                <span>F<sub>a</sub></span
+                ><strong id="fa-value">—</strong>
+              </div>
+              <div>
+                <span>F<sub>v</sub></span
+                ><strong id="fv-value">—</strong>
+              </div>
+              <div><span>I</span><strong id="importance-value">—</strong></div>
+            </div>
+            <label class="checkbox"
+              ><input id="particular" type="checkbox" /><span
+                >Aplica microzonificación o estudio particular</span
+              ></label
+            >
+            <details class="advanced">
+              <summary>Configuración del espectro <span>+</span></summary>
+              <label for="max-period">Período máximo <span class="label-note">s</span></label
+              ><input
+                id="max-period"
+                type="number"
+                min="0.1"
+                max="100"
+                step="0.1"
+                value="6"
+              /><label for="sample-step">Paso de la tabla <span class="label-note">s</span></label
+              ><select id="sample-step">
+                <option value="0.01">0,01 s</option>
+                <option value="0.02">0,02 s</option>
+                <option value="0.05">0,05 s</option>
+                <option value="0.1">0,10 s</option></select
+              ><label class="checkbox"
+                ><input id="higher-modes" type="checkbox" /><span
+                  >Tramo inicial para modos superiores</span
+                ></label
+              >
+              <p class="field-note">
+                A.2.6.1.3, A.2.6.2.3 y A.2.6.3.3. Solo para modos distintos del fundamental de la
+                dirección analizada.
+              </p>
+            </details>
+            <button class="primary-button" type="submit">
+              Actualizar espectros <span aria-hidden="true">↗</span></button
+            ><button id="reset" type="button" class="text-button">Restablecer ejemplo</button>
+          </form>
+          <div class="catalog-footer">
+            <span class="tiny-grid" aria-hidden="true">▦</span>
+            <p>
+              <strong id="catalog-total">Catálogo NSR-10</strong><br />Apéndice A-4 · Datos
+              integrados
+            </p>
+          </div>
+        </aside>
+        <section class="results" aria-label="Resultados del espectro">
+          <div id="error-box" class="error-box" role="alert" hidden></div>
+          <div class="results-head">
+            <div>
+              <p class="eyebrow">02 / RESPUESTA DEL SITIO</p>
+              <h2 id="site-name">Medellín, Antioquia</h2>
+            </div>
+            <span class="example-tag" id="case-tag">EJEMPLO EDITABLE</span>
+          </div>
+          <div class="site-meta">
+            <span id="hazard-badge" class="hazard-badge">Amenaza intermedia</span
+            ><span id="site-summary">Perfil D · Grupo I · ξ = 5 %</span
+            ><span class="meta-separator">/</span><span id="source-summary">Apéndice A-4</span>
+          </div>
+          <div class="period-cards">
+            <div>
+              <span>T<sub>0</sub> <small>INICIO</small></span
+              ><strong id="t0-value">—</strong>
+            </div>
+            <div>
+              <span>T<sub>C</sub> <small>TRANSICIÓN</small></span
+              ><strong id="tc-value">—</strong>
+            </div>
+            <div>
+              <span>T<sub>L</sub> <small>PERÍODO LARGO</small></span
+              ><strong id="tl-value">—</strong>
+            </div>
+            <div class="elastic-card">
+              <span>MODELO</span><strong>Elástico <small>5 %</small></strong>
+            </div>
+          </div>
+          <section class="case-toolbar panel" aria-labelledby="case-tools-heading">
+            <div class="case-toolbar-copy">
+              <p class="eyebrow">TU TRABAJO, A MANO</p>
+              <h3 id="case-tools-heading">Guarda, abre y continúa.</h3>
+              <p>Conserva las entradas de tu caso o descarga los resultados.</p>
+            </div>
+            <div class="case-actions">
+              <button type="button" id="save-case" class="save-button">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 3h12l4 4v14H3V3h2ZM7 3v6h10V3M7 21v-8h10v8" /></svg
+                >Guardar caso</button
+              ><button type="button" id="load-case" class="case-button">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M3 8V4h7l3 4h8v12H3V8Zm0 0h18M8 14h8m-4-4v8" /></svg
+                >Abrir caso</button
+              ><button type="button" id="export-csv" class="case-button">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4" /></svg
+                >Datos CSV
+              </button>
+            </div>
+            <input type="file" id="case-file" accept=".json,application/json" hidden />
+          </section>
+          <div id="result-content">
+            <div class="chart-panel panel">
+              <div class="chart-heading">
+                <div class="chart-title">
+                  <span class="curve-dot sa-dot"></span>
+                  <h3>Pseudoaceleración</h3>
+                  <span class="symbol">S<sub>a</sub></span>
+                </div>
+                <div class="chart-tools">
+                  <select id="accel-unit" aria-label="Unidad de pseudoaceleración">
+                    <option value="g">g</option>
+                    <option value="ms2">m/s²</option></select
+                  ><button
+                    type="button"
+                    class="icon-button"
+                    data-download="sa"
+                    aria-label="Descargar gráfica de pseudoaceleración"
+                    title="Descargar SVG"
+                  >
+                    ↓
+                  </button>
+                </div>
+              </div>
+              <div id="chart-sa" class="chart" data-key="sa"></div>
+            </div>
+            <div class="secondary-charts">
+              <div class="chart-panel panel">
+                <div class="chart-heading">
+                  <div class="chart-title">
+                    <span class="curve-dot sv-dot"></span>
+                    <h3>Pseudovelocidad</h3>
+                    <span class="symbol">S<sub>v</sub></span>
+                  </div>
+                  <div class="chart-tools">
+                    <span class="unit">m/s</span
+                    ><button
+                      type="button"
+                      class="icon-button"
+                      data-download="sv"
+                      aria-label="Descargar gráfica de pseudovelocidad"
+                      title="Descargar SVG"
+                    >
+                      ↓
+                    </button>
+                  </div>
+                </div>
+                <div id="chart-sv" class="chart" data-key="sv"></div>
+              </div>
+              <div class="chart-panel panel">
+                <div class="chart-heading">
+                  <div class="chart-title">
+                    <span class="curve-dot sd-dot"></span>
+                    <h3>Desplazamiento</h3>
+                    <span class="symbol">S<sub>d</sub></span>
+                  </div>
+                  <div class="chart-tools">
+                    <select id="displ-unit" aria-label="Unidad de desplazamiento">
+                      <option value="m">m</option>
+                      <option value="cm">cm</option>
+                      <option value="mm">mm</option></select
+                    ><button
+                      type="button"
+                      class="icon-button"
+                      data-download="sd"
+                      aria-label="Descargar gráfica de desplazamiento"
+                      title="Descargar SVG"
+                    >
+                      ↓
+                    </button>
+                  </div>
+                </div>
+                <div id="chart-sd" class="chart" data-key="sd"></div>
+              </div>
+            </div>
+            <div class="chart-legend">
+              <span><i class="legend-line"></i>Espectro normativo</span
+              ><span><i class="legend-dash"></i>Períodos de transición</span
+              ><span>Selecciona un punto para consultarlo</span>
+            </div>
+            <section class="inspector panel" aria-label="Consulta por período">
+              <div class="inspector-top">
+                <div>
+                  <p class="eyebrow">03 / EXPLORA UN PERÍODO</p>
+                  <h3 id="branch-name">Aceleración constante</h3>
+                </div>
+                <label class="period-input" for="selected-period"
+                  >T
+                  <input
+                    id="selected-period"
+                    type="number"
+                    min="0"
+                    max="6"
+                    step="0.01"
+                    value="1.00"
+                  />
+                  s</label
+                >
+              </div>
+              <input
+                id="period-slider"
+                type="range"
+                min="0"
+                max="6"
+                value="1"
+                step="0.001"
+                aria-label="Período de consulta"
+              />
+              <div class="inspection-grid">
+                <div class="readout sa-text">
+                  <span>S<sub>a</sub></span
+                  ><strong id="sa-readout">—</strong><small id="sa-equation">—</small>
+                </div>
+                <div class="readout sv-text">
+                  <span>S<sub>v</sub></span
+                  ><strong id="sv-readout">—</strong><small id="sv-equation">—</small>
+                </div>
+                <div class="readout sd-text">
+                  <span>S<sub>d</sub></span
+                  ><strong id="sd-readout">—</strong><small id="sd-equation">—</small>
+                </div>
+                <div class="oscillator">
+                  <div class="oscillator-caption">
+                    <p class="eyebrow">MODELO CONCEPTUAL</p>
+                    <h4>Un grado de libertad</h4>
+                    <strong id="model-period">T = 1,000 s</strong>
+                    <p>Esquema ilustrativo de masa y rigidez lateral.</p>
+                  </div>
+                  <svg
+                    viewBox="0 0 180 90"
+                    role="img"
+                    aria-label="Oscilador ilustrativo de un grado de libertad"
+                  >
+                    <path d="M20 77h140M33 77V24M140 77V24" class="model-ground" />
+                    <path id="model-column-left" d="M48 77Q48 50 48 22" class="model-column" />
+                    <path id="model-column-right" d="M125 77Q125 50 125 22" class="model-column" />
+                    <rect id="model-mass" x="39" y="14" width="95" height="13" rx="3" />
+                    <path d="M56 5h53m-4-3 4 3-4 3" class="model-arrow" /></svg
+                  ><span class="model-note">Desplazamiento ilustrativo · Sin escala</span>
+                </div>
+              </div>
+              <details class="calculation">
+                <summary>Ver sustitución numérica <span>↗</span></summary>
+                <div id="substitution"></div>
+              </details>
+            </section>
+            <details class="table-section panel">
+              <summary>
+                <span>Tabla de ordenadas <small id="sample-count"></small></span><span>+</span>
+              </summary>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">T (s)</th>
+                      <th scope="col">S<sub>a</sub> (g)</th>
+                      <th scope="col">S<sub>v</sub> (m/s)</th>
+                      <th scope="col">S<sub>d</sub> (m)</th>
+                      <th scope="col">Tramo</th>
+                    </tr>
+                  </thead>
+                  <tbody id="spectrum-table"></tbody>
+                </table>
+              </div>
+              <div class="table-pagination">
+                <button type="button" id="table-prev">← Anterior</button
+                ><span id="table-page"></span
+                ><button type="button" id="table-next">Siguiente →</button>
+              </div>
+            </details>
+          </div>
+        </section>
+      </div>
+      <section class="foundation" id="fundamento">
+        <div class="foundation-intro">
+          <p class="eyebrow">EL CÁLCULO, A LA VISTA</p>
+          <h2>Fundamento normativo</h2>
+          <p>
+            Espectros elásticos generales de diseño horizontal de la NSR-10. Se conservan las
+            expresiones y los coeficientes de cada magnitud.
+          </p>
+          <a
+            href="https://www.idrd.gov.co/sites/default/files/documentos/Construcciones/titulo-a-nsr-100.pdf#page=38"
+            target="_blank"
+            rel="noopener"
+            >Consultar Título A · Fuente IDRD ↗</a
+          >
+        </div>
+        <div class="foundation-body">
+          <details open>
+            <summary>Parámetros y períodos <span>−</span></summary>
+            <p>
+              F<sub>a</sub> y F<sub>v</sub>: tablas A.2.4-3 y A.2.4-4, interpolación lineal para
+              valores intermedios de A<sub>a</sub> y A<sub>v</sub>, respectivamente. I: tabla
+              A.2.5-1.
+            </p>
+            <div class="formula-strip">
+              <span class="period-formula">T<sub>0</sub> = 0,10 AᵥFᵥ / AₐFₐ</span
+              ><span class="period-formula">T<sub>C</sub> = 0,48 AᵥFᵥ / AₐFₐ</span
+              ><span class="period-formula">T<sub>L</sub> = 2,4 Fᵥ</span>
+            </div>
+          </details>
+          <details>
+            <summary>Expresiones de los tres espectros <span>+</span></summary>
+            <div class="table-scroll">
+              <table class="formula-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Magnitud</th>
+                    <th scope="col">0 ≤ T ≤ T<sub>C</sub></th>
+                    <th scope="col">T<sub>C</sub> &lt; T ≤ T<sub>L</sub></th>
+                    <th scope="col">T &gt; T<sub>L</sub></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Sₐ (g)</td>
+                    <td>2,5 AₐFₐI</td>
+                    <td>1,2 AᵥFᵥI / T</td>
+                    <td>1,2 AᵥFᵥT<sub>L</sub>I / T²</td>
+                  </tr>
+                  <tr>
+                    <td>Sᵥ (m/s)</td>
+                    <td>3,9 AₐFₐIT</td>
+                    <td>1,87 AᵥFᵥI</td>
+                    <td>1,87 AᵥFᵥIT<sub>L</sub> / T</td>
+                  </tr>
+                  <tr>
+                    <td>S<sub>d</sub> (m)</td>
+                    <td>0,62 AₐFₐIT²</td>
+                    <td>0,30 AᵥFᵥIT</td>
+                    <td>0,30 AᵥFᵥIT<sub>L</sub></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              A.2.6.1 a A.2.6.3. Los coeficientes redondeados del reglamento producen pequeños
+              saltos en T<sub>C</sub> para Sᵥ y S<sub>d</sub>. Las gráficas conservan esos valores.
+            </p>
+            <p>
+              En el modo para períodos inferiores a T₀ de modos distintos del fundamental, cada
+              expresión inicial se multiplica por (0,4 + 0,6 T/T₀), conforme a A.2.6-7, A.2.6-11 y
+              A.2.6-15.
+            </p>
+          </details>
+          <details>
+            <summary>Unidades y significado de las curvas <span>+</span></summary>
+            <p>
+              Sₐ se expresa como fracción de g; su conversión a m/s² usa g = 9,80665 m/s². Sᵥ se
+              expresa en m/s y S<sub>d</sub> en m. Para T &gt; 0, las relaciones de un oscilador
+              elástico son PSV = ωS<sub>d</sub> y PSA = ω²S<sub>d</sub>, con ω = 2π/T. Las
+              expresiones normativas usan coeficientes redondeados y no satisfacen estas
+              conversiones de forma idéntica.
+            </p>
+            <p>
+              Las curvas representan máximos espectrales para distintos períodos; no describen una
+              historia temporal. El esquema de 1 GDL es ilustrativo y no representa un edificio
+              calculado. El espectro elástico se presenta sin reducción por R.
+            </p>
+          </details>
+          <details>
+            <summary>Catálogo y condiciones particulares <span>+</span></summary>
+            <p id="catalog-method"></p>
+            <p>
+              Los nombres y códigos corresponden al documento normativo, no a una actualización de
+              la división administrativa. Para una localidad no incluida, utiliza ingreso manual y
+              documenta la fuente de Aₐ y Aᵥ; no se asignan parámetros por proximidad.
+            </p>
+            <p>
+              Los perfiles F requieren estudio particular (A.2.10). Si existe microzonificación o
+              estudio aplicable, deben emplearse sus movimientos de diseño según A.2.1.2 y A.2.9.
+              Esta aplicación calcula las curvas generales de A.2.6 y no genera los espectros
+              particulares de esos estudios.
+            </p>
+          </details>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <a class="footer-brand" href="./">espectra.</a
+      ><span>NSR-10 · Espectros de respuesta · Colombia · v0.2</span
+      ><span>Todo el cálculo ocurre en tu navegador.</span>
+    </footer>
+    <div id="toast" class="toast" role="status" hidden></div>
+  </body>
 </html>

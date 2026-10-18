@@ -1,0 +1,5 @@
+data/municipios.js
+outputs/
+work/
+node_modules/
+package-lock.json
