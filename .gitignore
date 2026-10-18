@@ -1,0 +1,7 @@
+outputs/
+work/
+node_modules/
+.playwright-cli/
+__pycache__/
+*.pyc
+Thumbs.db
