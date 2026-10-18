@@ -1,5 +1,10 @@
 # Historial de cambios
 
+## 0.4.0 — 2026-10-18
+
+- Agrega un botón visible para abrir el repositorio de GitHub desde la página.
+- Acredita a Juan Esteban Maya Rodriguez como autor en el README.
+
 ## 0.3.0 — 2026-10-18
 
 - Sustituye la deformación fija del esquema por una oscilación continua asociada al período seleccionado.

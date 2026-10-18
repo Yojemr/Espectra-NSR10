@@ -4,9 +4,11 @@
 
 Calculadora interactiva de los espectros elásticos generales de **pseudoaceleración, pseudovelocidad y desplazamiento** del capítulo A.2 de la NSR-10 colombiana, como funciones del período de vibración.
 
+**Autor:** Juan Esteban Maya Rodriguez.
+
 Funciona en GitHub Pages y abriendo `index.html` localmente. El cálculo se ejecuta en el navegador; no requiere cuenta, servidor de cálculo ni instalación.
 
-**Versión interna actual: 0.3.0**. La primera versión publicada corresponde a la versión interna 0.1.0.
+**Versión interna actual: 0.4.0**. La primera versión publicada corresponde a la versión interna 0.1.0.
 
 ## Funciones
 
@@ -16,6 +18,7 @@ Funciona en GitHub Pages y abriendo `index.html` localmente. El cálculo se ejec
 - Guardado y apertura de casos, exportación CSV y gráficas SVG.
 - Modos claro y oscuro, con controles y gráficas adaptados al tema.
 - Interfaz adaptable y oscilador conceptual de un grado de libertad.
+- Acceso directo al repositorio desde la página.
 
 ## Guía de uso
 

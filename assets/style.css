@@ -268,6 +268,22 @@ main {
   line-height: 1.7;
   margin: 0;
 }
+.repo-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 22px;
+  padding: 11px 16px;
+  border-radius: 6px;
+  background: var(--green);
+  color: var(--on-action);
+  font-size: 12px;
+  font-weight: 650;
+  text-decoration: none;
+}
+.repo-button:hover {
+  filter: brightness(1.08);
+}
 .intro-note {
   border-left: 1px solid var(--line);
   padding-left: 25px;
@@ -1764,6 +1780,11 @@ select {
   }
   .oscillator-caption p.eyebrow {
     font-size: 8px;
+  }
+}
+@media (max-width: 360px) {
+  .top-actions > .code-link {
+    display: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {
