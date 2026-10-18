@@ -11,7 +11,7 @@ assert.ok(
   'JavaScript notice must precede the header',
 );
 for (const match of html.matchAll(/(?:src|href)="(assets\/[^"#]+|data\/[^"#]+)"/g)) {
-  assert.ok(fs.existsSync(path.join(root, match[1])), `Missing asset: ${match[1]}`);
+  assert.ok(fs.existsSync(path.join(root, match[1].split('?')[0])), `Missing asset: ${match[1]}`);
 }
 for (const name of fs.readdirSync(path.join(root, 'assets'))) {
   const file = path.join(root, 'assets', name);
