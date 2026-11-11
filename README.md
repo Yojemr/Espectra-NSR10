@@ -2,13 +2,13 @@
 
 **[Abrir la aplicación →](https://yojemr.github.io/Espectra-NSR10/)** · [Repositorio](https://github.com/Yojemr/Espectra-NSR10) · [Historial de cambios](CHANGELOG.md)
 
-Calculadora interactiva de los espectros elásticos generales de **pseudoaceleración, pseudovelocidad y desplazamiento** del capítulo A.2 de la NSR-10 colombiana, como funciones del período de vibración.
+Aplicación para explorar los espectros elásticos de **pseudoaceleración, pseudovelocidad y desplazamiento** de la NSR-10 y desarrollar un **modelo preliminar de edificio y columnas**, con comparación DMO/DES.
 
 **Autor:** Juan Esteban Maya Rodriguez.
 
-Funciona en GitHub Pages y abriendo `index.html` localmente. El cálculo se ejecuta en el navegador; no requiere cuenta, servidor de cálculo ni instalación.
+Funciona en GitHub Pages. El cálculo se ejecuta en el navegador; no requiere cuenta ni servidor de cálculo. El módulo de espectros también permite abrir `index.html` directamente. El módulo estructural usa un Web Worker y requiere GitHub Pages o un servidor HTTP local.
 
-**Versión interna actual: 0.4.0**. La primera versión publicada corresponde a la versión interna 0.1.0.
+**Versión del código: 0.5.0**. El sitio público corresponde a la última revisión integrada en `main`; una rama o pull request no cambia automáticamente la página publicada. La primera versión publicada corresponde a la versión interna 0.1.0.
 
 ## Funciones
 
@@ -19,6 +19,79 @@ Funciona en GitHub Pages y abriendo `index.html` localmente. El cálculo se ejec
 - Modos claro y oscuro, con controles y gráficas adaptados al tema.
 - Interfaz adaptable y oscilador conceptual de un grado de libertad.
 - Acceso directo al repositorio desde la página.
+- Modelo gráfico del edificio, selección de columna/piso y vistas 3D y en planta.
+- Visores 3D interactivos del edificio y la columna: giro, desplazamiento, zoom y encuadre; concreto sólido, transparente, en corte u oculto para inspeccionar refuerzo.
+- Cargas gravitacionales, fuerzas sísmicas, derivas elásticas y diagnóstico de estabilidad.
+- Combinaciones concurrentes, interacción biaxial y detallado preliminar de columnas DMO/DES.
+- Proyectos estructurales JSON y exportación CSV de combinaciones, separados de los casos de espectros.
+
+## Edificio y columnas
+
+Accede desde la pestaña **Edificio y columnas** (`estructura.html`). Es una primera etapa de desarrollo: **no constituye un diseño estructural completo ni emite una certificación de cumplimiento de la NSR-10**.
+
+1. Revisa el municipio, perfil de suelo, grupo de uso y cargas del proyecto.
+2. Edita ejes, paneles omitidos, pisos, vigas, materiales y sección uniforme de columnas.
+3. Selecciona una columna y un tramo. **Calcular edificio** actualiza el modelo y ambos niveles de disipación.
+4. Consulta demanda concurrente, interacción biaxial, estribos, distribución sísmica y combinaciones.
+5. Para columna fuerte–viga débil, ingresa las capacidades **nominales Mnb**, positivas y negativas, en las caras del nudo superior y su fuente. No se calculan ni se inventan capacidades de vigas a partir de su geometría.
+6. Guarda un proyecto JSON para reproducir sus entradas. El CSV exporta todas las combinaciones de la columna y el piso elegidos.
+
+Un cambio de entradas marca los resultados anteriores y bloquea su exportación hasta recalcular. Los archivos importados se validan antes de sustituir el proyecto. Las capacidades faltantes se conservan como pendientes; un axial fuera del intervalo resistente no produce un contorno biaxial ficticio.
+
+### Visores 3D
+
+El edificio completo permite **girar, acercar, desplazar y seleccionar una columna y un piso con un clic**. La selección actualiza el tramo analizado y su resaltado. El control **Losas** facilita ver el pórtico interior. La planta SVG conserva la lectura de ejes y paneles.
+
+La columna se representa en escala geométrica a partir de b, h, tramo libre, recubrimiento, diámetros, posiciones de barras, ramas y niveles de estribos del régimen DMO/DES seleccionado. Permite mostrar concreto sólido, transparente, abierto mediante un corte longitudinal u oculto. Las barras y los estribos se pueden ocultar por separado. La textura de concreto y el corrugado son ilustrativos; el corte es una herramienta de inspección, no una abertura del elemento. No se generan ganchos, anclajes ni empalmes sin un detalle definido.
+
+- Ratón: arrastrar gira; rueda acerca; botón derecho y arrastre desplazan.
+- Táctil: un dedo gira; dos dedos permiten acercar y desplazar.
+- Teclado, con el visor enfocado: flechas giran; `+` y `−` cambian el acercamiento; `Inicio` encuadra.
+- Los botones de giro, zoom y encuadre ofrecen controles alternativos.
+
+Se requiere **WebGL 2**. Si no está disponible, se conservan los esquemas SVG y el cálculo numérico. El renderizado se actualiza al interactuar o cambiar datos; no hay un bucle continuo de animación. Se liberan los recursos al sustituir geometrías y cerrar la página.
+
+La biblioteca [Three.js](https://threejs.org/) **0.187.0** y OrbitControls se sirven desde `assets/vendor/three/`, con su licencia MIT. No se cargan desde una CDN. Las copias publicadas se verifican byte por byte contra la dependencia fijada en `package-lock.json` mediante `npm run check`. `npm run vendor:sync` las reproduce desde `node_modules` después de `npm ci`. La dependencia se utiliza para visualización y no interviene en los cálculos estructurales.
+
+### Caso inicial de Santa Marta
+
+| Entrada                        | Valor                                                        |
+| ------------------------------ | ------------------------------------------------------------ |
+| Municipio                      | Santa Marta, Magdalena · 47001 · Aa = 0,15; Av = 0,10        |
+| Perfil / grupo de uso del caso | C / I, sujetos a confirmación del proyecto                   |
+| Elevación                      | 12 pisos de 2,80 m                                           |
+| Ejes X                         | 0; 7; 15; 22; 28 m                                           |
+| Ejes Y                         | 0; 7,5; 15; 21,5 m                                           |
+| Panel omitido                  | Primer vano X, tercera fila Y                                |
+| Planta resultante              | 556,50 m²; 19 columnas y 29 tramos de viga por piso          |
+| D / L superficiales            | 6,3281646655 / 5,00 kN/m²                                    |
+| Vigas / losa equivalente       | 0,30 × 0,50 m / 0,12181818 m                                 |
+| f′c / fy / fyt / γ concreto    | 21 / 420 / 420 MPa / 24 kN/m³                                |
+| Sección inicial                | 400 × 400 mm; 8 barras No. 6; recubrimiento al estribo 40 mm |
+| Coeficientes iniciales         | φa = 1; φp = 0,9; φr = 1; R0 DMO = 5; R0 DES = 7             |
+
+La sección inicial se conserva para estudiar el caso y **resulta insuficiente**. No es una sección diseñada ni una recomendación de construcción. El refuerzo, las confirmaciones de hipótesis y las capacidades de vigas son datos editables o pendientes según corresponda. La transferencia de cargas a 45°, las rigideces efectivas y la idealización de apoyos/diafragma deben justificarse para el edificio real.
+
+### Método y comprobaciones implementadas
+
+- Pórtico espacial de barras Euler–Bernoulli; seis grados de libertad por nudo antes de imponer diafragmas rígidos en planta y empotramientos de base. Solución por Cholesky, con límites de tamaño y rechazo de matrices singulares.
+- Rigidez Ec = 4700√f′c (MPa), G = Ec/[2(1+ν)], factores efectivos de flexión editables. La rigidez torsional de cada barra usa el mismo factor de su sección.
+- Cargas superficiales a las vigas mediante áreas tributarias a 45° y cargas consistentes. Peso propio de vigas descontando la losa equivalente y peso de columnas. Se comprueba el equilibrio gravitacional por reacciones.
+- El peso sísmico se concentra por niveles; cada segmento de columna aporta la mitad a cada extremo. La mitad adyacente a la base fija no se incorpora a la masa elevada.
+- Fuerza horizontal equivalente (FHE): estimación estática de T mediante Rayleigh, límite Cu·Ta, distribución por Wi·hi^k, torsión inherente del modelo y excentricidad accidental ±5 %. Es una estimación de período, **no un análisis modal**. La comprobación de elegibilidad FHE es parcial y no sustituye revisar A.3.4.2 para el caso específico.
+- Combinaciones de resistencia implementadas: 1,4D; 1,2D+1,6L; 1,2D+L±E; 0,9D±E. E combina 100/30 con signos y excentricidades independientes. Se evalúan ambos extremos de columna y siete patrones discretos de L: uniforme, alternados por paneles X/Y y pisos. Solo E se divide por R = φaφpφrR0.
+- Sección rectangular con barras simétricas perimetrales: compatibilidad de deformaciones, εcu = 0,003, bloque equivalente, fluencia del acero, concreto desplazado por barras y φ según deformación de tracción. Superficie biaxial con 96 orientaciones y discretización de profundidad del eje neutro; corte al Pu concurrente y comprobación radial de momentos. Límite axial de columna con estribos: 0,80·0,65·Po.
+- Detallado DMO/DES: cuantía, geometría, separación libre, recubrimiento interior base, diámetro de estribos, confinamiento y espaciamientos. Los resultados distinguen el espaciamiento geométrico del límite por área de refuerzo transversal.
+- Cortante por capacidad: momentos nominales DMO y probables DES con 1,25fy; alternativa Ω0E donde corresponde. Resistencia conservadora con **Vc = 0, φ = 0,60** y el mayor espaciamiento editado. Si existen axiales fuera del intervalo resistente, Ve permanece pendiente.
+- Columna fuerte–viga débil: ΣMnc ≥ 1,2ΣMnb en cada dirección, usando axiales concurrentes de las columnas y la reversión más exigente de capacidades nominales de vigas suministradas.
+
+### Alcance pendiente para cerrar un diseño
+
+El análisis es de **primer orden**. Se muestran Q y Ax como diagnósticos; no se aplica automáticamente P-Δ ni amplificación Ax > 1 a los esfuerzos. Faltan el análisis de segundo orden y esbeltez local, justificación de diafragma y rigideces, evaluación completa de irregularidades, restricciones del sistema estructural según amenaza/uso/altura, exposición y durabilidad, ganchos y apoyo lateral de barras, empalmes, anclajes, tamaño de agregado, diseño de vigas y losas, cortante de nudos y cimentaciones.
+
+La sección es uniforme en todo el edificio. No hay perfiles independientes por columna o piso, muros, resortes de apoyo, diafragmas flexibles ni análisis modal. Las familias de carga implementadas no incluyen viento, nieve, presión de suelo, fluidos o cargas especiales de cubierta. Estas cargas y otros elementos solo quedan representados si están debidamente incorporados a las entradas aplicables. Los siete patrones de carga viva no agotan todas las distribuciones posibles.
+
+Referencias principales: títulos A, B y [C de la NSR-10](https://www.idrd.gov.co/sites/default/files/documentos/Construcciones/3titulo-c-nsr-100.pdf); [Decreto 092 de 2011](https://normas.cra.gov.co/gestor/docs/decreto_0092_2011.htm) y [Decreto 340 de 2012](https://normas.cra.gov.co/gestor/docs/decreto_0340_2012.htm). Se revisaron también las modificaciones de los decretos 945 de 2017 y 1711 de 2021 para delimitar el alcance. La interfaz identifica las referencias de cada comprobación implementada; una comprobación satisfecha no implica cumplimiento global del edificio.
 
 ## Guía de uso
 
@@ -94,7 +167,7 @@ SHA-256 del PDF de 186 páginas utilizado:
 
 ## Desarrollo local
 
-Para utilizar la aplicación basta abrir `index.html`. Para trabajar mediante HTTP:
+Para utilizar ambos módulos, sirve la carpeta mediante HTTP. El módulo estructural puede ser bloqueado por el navegador si se abre con `file://`:
 
 ```sh
 python -m http.server 8765 --bind 127.0.0.1
@@ -123,6 +196,7 @@ La verificación continua ejecuta las pruebas, las comprobaciones de integridad 
 
 ```text
 index.html                  Interfaz y fundamento normativo
+estructura.html             Edificio y columnas DMO/DES
 assets/theme.js             Preferencia y cambio de tema
 assets/engine.js            Motor numérico NSR-10
 assets/charts.js            Gráficas, selección y exportación SVG
@@ -130,10 +204,21 @@ assets/oscillator.js        Animación ilustrativa y control de movimiento
 assets/cases.js             Validación de casos y celdas CSV
 assets/app.js               Coordinación de la interfaz
 assets/style.css            Diseño adaptable y ambos modos
+assets/project.js           Esquema validado y geometría del proyecto
+assets/frame.js             Pórtico 3D, cargas, solución y equilibrio
+assets/section.js           Compatibilidad, interacción y detallado
+assets/building.js          FHE, combinaciones y comparación DMO/DES
+assets/structure-worker.js  Cálculo estructural fuera del hilo de interfaz
+assets/structure-ui.js      Entradas, proyectos y resultados estructurales
+assets/structure-view.js    Modelos y gráficas SVG estructurales
+assets/structure-3d.js      Visores WebGL interactivos y selección de elementos
+assets/vendor/three/       Biblioteca gráfica local y licencia MIT
+assets/structure.css        Interfaz adaptable del módulo estructural
 data/municipios.js          Catálogo normativo con trazabilidad
 tests/                      Pruebas numéricas y de casos
 tools/check_source.cjs      Integridad de HTML, recursos y sintaxis
 tools/extract_catalog.py    Extracción reproducible del catálogo
+tools/sync_vendor.cjs       Copia y verificación de la biblioteca gráfica
 ```
 
 Para regenerar el catálogo, con Python, `pypdf` y `pdfplumber`:
@@ -144,10 +229,25 @@ python tools/extract_catalog.py ruta/al/titulo-a-nsr-100.pdf
 
 El archivo generado se mantiene fuera del formateador para conservar su reproducibilidad.
 
+### Validación
+
+Las pruebas incluyen espectros y catálogo completo, compatibilidad de casos anteriores, oscilador, soluciones analíticas de barra/ménsula, equilibrio de cargas consistentes y reacciones globales, capacidad axial independiente, deformaciones y φ, flexión biaxial y convergencia angular, combinaciones y conservación de cargas gravitacionales entre DMO/DES, y regresiones de espaciamientos. La revisión de navegador cubre importación/exportación, datos inválidos, actualización del modelo, temas y vistas móviles.
+
+### Flujo de Git y GitHub
+
+1. Parte de `main` actualizado y crea una rama `feat/...`, `fix/...` o `docs/...`.
+2. Conserva commits pequeños y coherentes con mensajes Conventional Commits; separa motor, interfaz y documentación cuando facilite la revisión.
+3. Antes de cada commit, revisa estado, archivos preparados y diff. Excluye credenciales, datos privados, rutas locales, libros fuente, capturas y archivos de prueba temporales.
+4. Ejecuta las pruebas, integridad y formato; comprueba visualmente los cambios de interfaz.
+5. Abre un pull request a `main`, documenta comportamiento, alcance y validación. Integra después de revisar el diff y los checks.
+6. Verifica el commit remoto, las acciones y el sitio publicado. No uses force push ni reescribas historial público sin autorización.
+
+El flujo de checks tiene permisos de lectura y acciones fijadas por SHA. Se ejecuta en pull requests y en actualizaciones de `main`, `feat/**` y `fix/**`. La plantilla de PR recoge cambios, validación y alcance. Las reglas efectivas de protección de ramas se administran en GitHub y no quedan activadas por este documento.
+
 ## Publicación
 
 Sitio desplegado: **[yojemr.github.io/Espectra-NSR10](https://yojemr.github.io/Espectra-NSR10/)**.
 
 GitHub Pages publica la raíz de `main`. El archivo `.nojekyll` permite servir directamente los recursos y las rutas internas son relativas. Cada cambio en `main` genera un nuevo despliegue, cuyo estado se consulta en **Actions → pages build and deployment**.
 
-El cálculo y los archivos de casos se procesan en el navegador. La preferencia de tema se conserva localmente cuando está permitido.
+El cálculo y los archivos de casos/proyectos se procesan en el navegador. No se envían a un servicio de cálculo. La preferencia de tema se conserva localmente cuando está permitido. No se necesita un despliegue adicional para el modelo estructural.

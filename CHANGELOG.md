@@ -1,5 +1,18 @@
 # Historial de cambios
 
+## 0.5.0 — 2026-11-11
+
+- Módulo de edificio y columnas integrado con los espectros, partiendo de la planta del proyecto de Santa Marta.
+- Modelo 3D de pórticos, cargas consistentes, comprobación de equilibrio, FHE y comparación DMO/DES con combinaciones concurrentes.
+- Sección rectangular, interacción biaxial por compatibilidad, esquemas de refuerzo y comprobaciones preliminares de confinamiento y cortante.
+- Columna fuerte–viga débil con capacidades nominales de vigas ingresadas y documentadas por el usuario.
+- Proyectos JSON validados, exportación CSV, resultados anteriores identificados al editar y cálculo en Web Worker.
+- Vistas 3D/planta, selección de columna/piso, temas y adaptación móvil; enlace al espectro del sitio seleccionado.
+- Visores 3D interactivos con giro, desplazamiento, acercamiento y encuadre. Selección de columna/piso sobre el edificio y concreto sólido, transparente, en corte u oculto en el detalle de refuerzo.
+- Three.js local con versión fija, licencia y verificación reproducible; cálculo independiente del visor y alternativa SVG cuando WebGL 2 no está disponible.
+- Pruebas analíticas, de equilibrio y de regresión; límites explícitos de primer orden y verificaciones pendientes.
+- Desarrollo en rama, plantilla de PR, checks en ramas de trabajo y documentación del flujo de contribución.
+
 ## 0.4.0 — 2026-10-18
 
 - Agrega un botón visible para abrir el repositorio de GitHub desde la página.
