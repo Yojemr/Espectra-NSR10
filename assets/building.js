@@ -12,6 +12,13 @@
     const spectrum = N.parameters({ ...p.site, higher: false }),
       model = F.build(p, g),
       steel = S.bars(p.section, P.BARS);
+    const tolerance = 1e-8 * Math.max(1, model.checks.expectedDead);
+    if (
+      !Number.isFinite(model.checks.residual) ||
+      Math.abs(model.checks.gravityError) > tolerance ||
+      model.checks.residual > tolerance
+    )
+      throw new Error('La solución no satisface la comprobación de equilibrio numérico.');
     const design = S.surface(p.section, steel, p.fc, p.fy, p.es),
       nominal = S.surface(p.section, steel, p.fc, p.fy, p.es, false),
       probable = S.surface(p.section, steel, p.fc, 1.25 * p.fy, p.es, false);
@@ -329,7 +336,7 @@
       fheAllowed,
       maxAx,
       interaction: {
-        curves: [design.curves[0], design.curves[24]],
+        curves: [design.curves[24], design.curves[0]],
         pmax: design.pmax,
         pmin: design.pmin,
       },

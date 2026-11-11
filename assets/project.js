@@ -117,6 +117,8 @@
     for (const [key, bounds] of Object.entries(fields)) q[key] = number(p[key], key, ...bounds);
     if (q.slabEquivalent >= q.beamH)
       throw new Error('La altura de viga debe superar el espesor macizo equivalente.');
+    if (q.beamH >= q.storyHeight)
+      throw new Error('La altura de viga debe ser menor que la altura de piso.');
     for (const axis of ['x', 'y']) {
       if (!Array.isArray(p[axis]) || p[axis].length < 2 || p[axis].length > 6)
         throw new Error('Cada dirección requiere entre 2 y 6 ejes.');

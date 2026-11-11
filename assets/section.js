@@ -203,6 +203,12 @@
     }
     const checks = [
       {
+        label: 'Diámetro mínimo de estribo',
+        pass: s.tie >= (s.bar >= 11 ? 4 : 3),
+        value: s.bar >= 11 ? 12.7 : 9.5,
+        ref: 'C.7.10.5.1',
+      },
+      {
         label: 'Cuantía longitudinal 1–4 %',
         pass: As / Ag >= 0.01 && As / Ag <= 0.04,
         value: As / Ag,

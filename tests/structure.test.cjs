@@ -120,6 +120,35 @@ test('Concrete displacement subtracts steel volume and gives independent pure ax
   near(tension.p, (-420 * As) / 1000);
   near(tension.phi, 0.9);
 });
+test('Independent lateral reactions balance shear, vertical force and overturning moment', () => {
+  const model = F.build(original, geometry),
+    forces = Array.from({ length: original.floors }, (_, i) => 100 * (i + 1));
+  const sum = forces.reduce((a, v) => a + v, 0),
+    overturn = forces.reduce((a, v, i) => a + v * (i + 1) * original.storyHeight, 0);
+  const bases = model.elements.filter((e) => e.kind === 'column' && e.a.floor === 0);
+  for (const axis of ['x', 'y']) {
+    const lateral = model.lateral(forces, axis, 1);
+    const reactions = bases.map((e) => ({ e, d: model.actions(e, lateral.u) }));
+    near(
+      reactions.reduce((a, { d }) => a + d[axis === 'x' ? 3 : 4], 0),
+      -sum,
+      1e-8,
+    );
+    near(
+      reactions.reduce((a, { d }) => a + d[0], 0),
+      0,
+      1e-7,
+    );
+    near(
+      reactions.reduce(
+        (a, { e, d }) => a + (axis === 'x' ? d[2] - e.a.x * d[0] : d[1] + e.a.y * d[0]),
+        0,
+      ),
+      axis === 'x' ? -overturn : overturn,
+      1e-8,
+    );
+  }
+});
 test('Strength factor follows the actual extreme steel strain', () => {
   const s = original.section,
     bars = S.bars(s, P.BARS),
@@ -200,4 +229,25 @@ test('Changing dimensions recomputes weight, stiffness and capacities', () => {
   assert.ok(result.periods.x < baseline.periods.x);
   assert.ok(result.interaction.pmax > baseline.interaction.pmax);
   assert.ok(result.checks.residual < 1e-6);
+});
+test('Displayed uniaxial reference curves follow the global bending axes', () => {
+  const [x, y] = baseline.interaction.curves;
+  assert.ok(Math.max(...x.map((v) => Math.abs(v.mx))) > 100);
+  assert.ok(Math.max(...y.map((v) => Math.abs(v.my))) > 100);
+  assert.ok(Math.max(...x.map((v) => Math.abs(v.my))) < 1e-8);
+  assert.ok(Math.max(...y.map((v) => Math.abs(v.mx))) < 1e-8);
+});
+test('Zero clear column height is rejected and No.11 bars require No.4 ties', () => {
+  const p = structuredClone(original);
+  p.storyHeight = 2;
+  p.beamH = 2;
+  assert.throws(() => P.validate(p), /menor/);
+  p.storyHeight = 2.8;
+  p.beamH = 0.5;
+  p.section.bar = 11;
+  const check = () =>
+    S.detailing(p, 'DES', S.bars(p.section, P.BARS)).checks.find((v) => v.ref === 'C.7.10.5.1');
+  assert.equal(check().pass, false);
+  p.section.tie = 4;
+  assert.equal(check().pass, true);
 });
