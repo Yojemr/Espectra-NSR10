@@ -527,4 +527,16 @@
     if (valid) selectPeriod(selectedT);
   });
   reset();
+  const linkedSite = new URLSearchParams(window.location.search);
+  const linkedCity = records.find((item) => item.code === linkedSite.get('site'));
+  if (linkedCity) {
+    $('department').value = linkedCity.department;
+    municipalities(linkedCity.code);
+    const soil = linkedSite.get('soil');
+    const group = linkedSite.get('group');
+    if (['A', 'B', 'C', 'D', 'E'].includes(soil)) $('soil').value = soil;
+    if (['I', 'II', 'III', 'IV'].includes(group)) $('group').value = group;
+    example = false;
+    update();
+  }
 })();

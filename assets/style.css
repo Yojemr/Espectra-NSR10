@@ -1832,3 +1832,21 @@ select {
     display: none;
   }
 }
+
+.module-nav {
+  display: flex;
+  gap: 8px;
+  padding: 14px max(24px, calc((100% - 1440px) / 2));
+  border-bottom: 1px solid var(--line);
+}
+.module-nav a {
+  color: var(--muted);
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+.module-nav a[aria-current='page'] {
+  background: var(--green);
+  color: var(--on-action);
+}
