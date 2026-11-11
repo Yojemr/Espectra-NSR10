@@ -420,7 +420,7 @@ export function create(host, { kind, onSelect, onStatus } = {}) {
     host.dataset.depth = String(s.h);
     host.dataset.clearHeight = String(detail.clearLength);
     onStatus?.(
-      `${steel.length} barras No. ${s.bar} · ${detail.ties.length} niveles de estribos No. ${s.tie} · tramo libre ${detail.clearLength} mm. Corrugado superficial ilustrativo.`,
+      `${steel.length} barras No. ${s.bar} · ${detail.ties.length} niveles de estribos No. ${s.tie} · tramo libre ${detail.clearLength.toLocaleString('es-CO', { maximumFractionDigits: 2 })} mm. Corrugado superficial ilustrativo.`,
     );
   }
   function configure(next = {}) {
