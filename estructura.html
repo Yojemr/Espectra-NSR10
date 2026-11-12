@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f6f5f0" />
+    <meta
+      name="description"
+      content="Modelo de pórticos y comparación preliminar de columnas DMO y DES del proyecto de Santa Marta."
+    />
+    <title>Edificio y columnas · Espectra NSR-10</title>
+    <script type="importmap">
+      { "imports": { "three": "./assets/vendor/three/three.module.js" } }
+    </script>
+    <script src="assets/theme.js?v=0.5.0"></script>
+    <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="assets/style.css?v=0.5.0" />
+    <link rel="stylesheet" href="assets/structure.css?v=0.5.0" />
+    <script src="data/municipios.js" defer></script>
+    <script src="assets/engine.js?v=0.5.0" defer></script>
+    <script src="assets/cases.js?v=0.5.0" defer></script>
+    <script src="assets/project.js?v=0.5.0" defer></script>
+    <script src="assets/reinforcement.js?v=0.5.0" defer></script>
+    <script src="assets/section.js?v=0.5.0" defer></script>
+    <script src="assets/structure-view.js?v=0.5.0" defer></script>
+    <script src="assets/structure-ui.js?v=0.5.0" defer></script>
+  </head>
+  <body class="building-app">
+    <noscript
+      ><div class="js-notice" role="alert">
+        <strong>Activa JavaScript para utilizar Espectra.</strong
+        ><span>El modelo, el cálculo y las gráficas necesitan JavaScript.</span>
+      </div></noscript
+    >
+    <a class="skip" href="#building-workspace">Ir al edificio y las columnas</a>
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Espectra, inicio"
+        ><svg viewBox="0 0 34 34" aria-hidden="true"><path d="M3 25h5l5-18 6 21 5-13 3 10h5" /></svg
+        ><span>espectra<span class="brand-dot">.</span></span></a
+      >
+      <span class="top-caption">INGENIERÍA ESTRUCTURAL <span>/</span> COLOMBIA</span>
+      <div class="top-actions">
+        <span class="version-badge">v0.5</span
+        ><button type="button" id="theme-toggle" class="theme-toggle" hidden>
+          <span id="theme-label">Modo oscuro</span></button
+        ><a
+          class="code-link"
+          href="https://github.com/Yojemr/Espectra-NSR10"
+          target="_blank"
+          rel="noopener noreferrer"
+          >GitHub ↗</a
+        >
+      </div>
+    </header>
+    <nav class="module-nav" aria-label="Módulos">
+      <a href="index.html">Espectros</a
+      ><a href="estructura.html" aria-current="page">Edificio y columnas</a>
+    </nav>
+    <main class="building-main" id="building-workspace">
+      <section class="building-intro">
+        <div>
+          <p class="eyebrow">DEL SITIO A LA SECCIÓN</p>
+          <h1>Un edificio.<br /><span>Dos niveles de disipación.</span></h1>
+          <p>Geometría, cargas y materiales compartidos para comparar DMO y DES.</p>
+        </div>
+        <div class="scope-tag">
+          <strong>ANÁLISIS PRELIMINAR</strong><span>Pórtico 3D · primer orden · FHE</span
+          ><a href="#scope">Condiciones del análisis ↓</a>
+        </div>
+      </section>
+      <div class="building-tools" aria-label="Herramientas del proyecto">
+        <button type="button" id="calculate" class="primary-action">Calcular edificio</button>
+        <button type="button" id="save-project">↓ Guardar proyecto</button>
+        <button type="button" id="open-project">↑ Abrir proyecto</button>
+        <button type="button" id="export-cases" disabled>CSV de combinaciones</button>
+        <button type="button" id="reset-project">Santa Marta inicial</button>
+        <input type="file" id="project-file" accept=".json,application/json" hidden />
+      </div>
+      <p id="building-status" class="building-status" role="status" aria-live="polite">
+        Preparando el proyecto…
+      </p>
+      <div id="building-error" class="error-box" role="alert" hidden></div>
+      <div class="building-layout">
+        <aside class="building-inputs panel">
+          <h2>01 / Datos del proyecto</h2>
+          <p class="reading-guide">
+            El sitio define la amenaza; la geometría, las cargas y los materiales definen el modelo
+            resistente.
+          </p>
+          <form id="building-form" novalidate></form>
+        </aside>
+        <div class="building-results" id="building-results">
+          <section class="panel model-panel" aria-labelledby="model-heading">
+            <div class="building-heading">
+              <div>
+                <p class="eyebrow">02 / IDEALIZACIÓN</p>
+                <h2 id="model-heading">El modelo interpretado</h2>
+              </div>
+              <div class="view-toggle">
+                <button type="button" id="view-3d" aria-pressed="true">3D</button
+                ><button type="button" id="view-plan" aria-pressed="false">Planta</button>
+              </div>
+            </div>
+            <p class="reading-guide">
+              El tramo resaltado identifica la columna y el piso de los resultados. La planta
+              permite comprobar ejes y entrantes.
+            </p>
+            <div class="model-selectors">
+              <label>Columna<select id="column-select"></select></label
+              ><label>Piso del tramo<select id="floor-select"></select></label
+              ><a id="site-spectrum" href="index.html">Ver espectros del sitio ↗</a>
+            </div>
+            <div class="webgl-tools" id="building-3d-tools" hidden>
+              <button type="button" id="building-fit">Encuadrar</button
+              ><button type="button" id="building-turn">Girar 30°</button
+              ><button type="button" id="building-zoom-in" aria-label="Acercar edificio">+</button
+              ><button type="button" id="building-zoom-out" aria-label="Alejar edificio">−</button
+              ><label class="inline-check"
+                ><input type="checkbox" id="building-slabs" checked />Losas</label
+              >
+            </div>
+            <div id="building-webgl" class="webgl-view building-webgl" hidden></div>
+            <p id="building-3d-status" class="building-caption" role="status"></p>
+            <svg
+              id="building-model"
+              viewBox="0 0 720 410"
+              role="img"
+              aria-label="Modelo del edificio; el tramo elegido se resalta en color"
+            ></svg>
+            <p id="model-caption" class="building-caption"></p>
+            <p class="building-caption">
+              Geometría sin deformar. Los ejes X/Y son globales. El tramo elegido se evalúa en ambos
+              extremos.
+            </p>
+          </section>
+          <div id="calculated-results" hidden>
+            <section
+              id="building-facts"
+              class="building-facts"
+              aria-label="Resumen del análisis"
+            ></section>
+            <section class="panel">
+              <div class="building-heading">
+                <div>
+                  <p class="eyebrow">03 / DEMANDA Y RESISTENCIA</p>
+                  <h2>DMO frente a DES</h2>
+                </div>
+                <span class="small-tag">MISMAS CARGAS D Y L</span>
+              </div>
+              <p class="building-caption">
+                Cada tarjeta conserva P, Mx y My de una misma combinación. Los límites corresponden
+                a la sección uniforme editada.
+              </p>
+              <div id="regime-cards" class="regime-cards"></div>
+              <p class="reading-guide">
+                Demanda/capacidad ≤ 1 indica resistencia suficiente para esa comprobación. DMO y DES
+                comparten gravedad; cambian R y el detallado.
+              </p>
+            </section>
+            <section class="panel">
+              <div class="building-heading">
+                <div>
+                  <p class="eyebrow">04 / REFUERZO</p>
+                  <h2>Sección y confinamiento</h2>
+                </div>
+                <label
+                  >Detallado mostrado<select id="detail-regime">
+                    <option>DMO</option>
+                    <option>DES</option>
+                  </select></label
+                >
+              </div>
+              <p class="reading-guide">
+                As y ρ describen el acero longitudinal; l₀ y s describen el confinamiento. Cada
+                estado compara el valor adoptado con su límite.
+              </p>
+              <div class="column-3d-panel">
+                <div class="building-heading">
+                  <h3>Columna 3D interactiva</h3>
+                  <label
+                    >Concreto<select id="column-concrete">
+                      <option value="cut">Corte longitudinal</option>
+                      <option value="solid">Sólido</option>
+                      <option value="transparent">Transparente</option>
+                      <option value="hidden">Oculto · solo refuerzo</option>
+                    </select></label
+                  >
+                </div>
+                <div class="webgl-tools">
+                  <button type="button" id="column-fit">Encuadrar</button
+                  ><button type="button" id="column-turn">Girar 30°</button
+                  ><button type="button" id="column-zoom-in" aria-label="Acercar columna">+</button
+                  ><button type="button" id="column-zoom-out" aria-label="Alejar columna">−</button
+                  ><label class="inline-check"
+                    ><input type="checkbox" id="column-bars" checked />Barras longitudinales</label
+                  ><label class="inline-check"
+                    ><input type="checkbox" id="column-ties" checked />Estribos y ramas</label
+                  >
+                </div>
+                <div id="column-webgl" class="webgl-view column-webgl"></div>
+                <p id="column-3d-status" class="building-caption" role="status"></p>
+                <p class="building-caption">
+                  Ratón: arrastre para girar, rueda para acercar y botón derecho para desplazar.
+                  Táctil: un dedo gira; dos acercan o desplazan. El corte de concreto es una vista
+                  de inspección.
+                </p>
+              </div>
+              <div class="section-views">
+                <figure>
+                  <svg
+                    id="column-section"
+                    viewBox="0 0 500 430"
+                    role="img"
+                    aria-label="Sección de la columna con barras y ramas de estribos"
+                  ></svg>
+                  <figcaption id="section-caption"></figcaption>
+                </figure>
+                <figure>
+                  <svg
+                    id="column-elevation"
+                    viewBox="0 0 360 430"
+                    role="img"
+                    aria-label="Elevación del tramo libre y zonas de confinamiento"
+                  ></svg>
+                  <figcaption id="ties-caption"></figcaption>
+                </figure>
+              </div>
+              <div class="table-scroll">
+                <table id="detail-checks">
+                  <caption>
+                    Comprobaciones geométricas y de refuerzo transversal
+                  </caption>
+                  <thead>
+                    <tr>
+                      <th>Comprobación</th>
+                      <th>DMO</th>
+                      <th>DES</th>
+                      <th>Referencia</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+              <p class="building-caption">
+                Diámetros interiores de doblado según C.7.2; ganchos de 135° con extensión ≥
+                máx.(6dₜ, 75 mm), según C.7.1.4. Anclajes, empalmes y condiciones de exposición no
+                verificados.
+              </p>
+            </section>
+            <section class="panel">
+              <div class="building-heading">
+                <div>
+                  <p class="eyebrow">05 / INTERACCIÓN</p>
+                  <h2>Resistencia axial y flexión</h2>
+                </div>
+                <label
+                  >Comparar demanda<select id="interaction-regime">
+                    <option>DMO</option>
+                    <option>DES</option>
+                  </select></label
+                >
+              </div>
+              <p class="reading-guide">
+                El punto contiene esfuerzos concurrentes. Dentro del contorno hay resistencia
+                disponible al Pu indicado; fuera de él, la sección es insuficiente.
+              </p>
+              <div class="interaction-views">
+                <figure>
+                  <svg
+                    id="interaction-pm"
+                    viewBox="0 0 480 310"
+                    role="img"
+                    aria-label="Diagramas uniaxiales de resistencia de diseño y demanda gobernante"
+                  ></svg>
+                  <figcaption>
+                    Curvas uniaxiales de referencia φPn–φMn. La comprobación usa la superficie
+                    biaxial.
+                  </figcaption>
+                </figure>
+                <figure>
+                  <svg
+                    id="interaction-mm"
+                    viewBox="0 0 480 310"
+                    role="img"
+                    aria-label="Corte de la superficie biaxial al esfuerzo axial de la combinación gobernante"
+                  ></svg>
+                  <figcaption id="interaction-caption"></figcaption>
+                </figure>
+              </div>
+            </section>
+            <section class="panel">
+              <p class="eyebrow">06 / EQUILIBRIO DEL NUDO</p>
+              <h2>Columna fuerte · viga débil</h2>
+              <p class="building-caption">
+                Ingresa magnitudes nominales Mnb en las caras del nudo superior, en kN·m, incluyendo
+                la participación de losa que corresponda. No utilices φMn. Izquierda/derecha se
+                refieren al sentido creciente del eje global. Vacío significa pendiente; cero es una
+                capacidad nula.
+              </p>
+              <div id="joint-inputs" class="joint-inputs"></div>
+              <p class="result-formula">ΣMnc / (1,2 ΣMnb) ≥ 1,00</p>
+              <p class="reading-guide">
+                La relación compara columnas y vigas del mismo nudo. Un valor ≥ 1 satisface esta
+                comprobación; sin capacidades de viga no es evaluable.
+              </p>
+              <div id="joint-results"></div>
+              <p class="building-caption">
+                Se compara ΣMnc / (1,2 ΣMnb) ≥ 1, con capacidades de columnas evaluadas al axial
+                concurrente. Esta comprobación no reemplaza el diseño de vigas ni la resistencia a
+                cortante del nudo.
+              </p>
+            </section>
+            <section class="panel">
+              <div class="building-heading">
+                <div>
+                  <p class="eyebrow">07 / DISTRIBUCIÓN SÍSMICA</p>
+                  <h2>Fuerzas, derivas y estabilidad</h2>
+                </div>
+                <label
+                  >Dirección<select id="force-axis">
+                    <option value="x">X</option>
+                    <option value="y">Y</option>
+                  </select></label
+                >
+              </div>
+              <p id="period-caption" class="building-caption"></p>
+              <p class="reading-guide">
+                Wi es el peso del nivel; Fi, su fuerza; Vi, el cortante acumulado. La deriva es
+                relativa al piso; Q &gt; 0,10 indica sensibilidad a segundo orden.
+              </p>
+              <div class="table-scroll">
+                <table id="floor-forces">
+                  <caption>
+                    Respuesta elástica sin dividir por R; torsión accidental ±5 % con Ax = 1
+                  </caption>
+                  <thead>
+                    <tr>
+                      <th>Piso</th>
+                      <th>Wi (kN)</th>
+                      <th>Fi (kN)</th>
+                      <th>Vi (kN)</th>
+                      <th>Deriva (%)</th>
+                      <th>Q</th>
+                      <th>Ax estimado</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </section>
+            <section class="panel">
+              <div class="building-heading">
+                <div>
+                  <p class="eyebrow">08 / TRAZABILIDAD</p>
+                  <h2>Combinaciones de la columna</h2>
+                </div>
+                <label
+                  >Disipación<select id="cases-regime">
+                    <option>DMO</option>
+                    <option>DES</option>
+                  </select></label
+                >
+              </div>
+              <p class="building-caption">
+                Compresión P positiva; momentos y cortantes con signo en ejes globales. Casos
+                ordenados por demanda de sección. Efectos 100/30, signos y excentricidades
+                independientes; siete patrones de carga viva.
+              </p>
+              <p class="reading-guide">
+                Cada fila conserva P, M y V de una misma combinación y extremo. Demanda/capacidad
+                &gt; 1 indica insuficiencia de la sección.
+              </p>
+              <div class="table-scroll cases-scroll">
+                <table id="column-cases">
+                  <caption>
+                    Valores concurrentes por combinación y extremo · Desplázate dentro de la tabla
+                    para ver todas las filas de la página.
+                  </caption>
+                  <thead>
+                    <tr>
+                      <th>Caso / patrón</th>
+                      <th>Extremo</th>
+                      <th>Pu (kN)</th>
+                      <th>Mx (kN·m)</th>
+                      <th>My (kN·m)</th>
+                      <th>Vx (kN)</th>
+                      <th>Vy (kN)</th>
+                      <th>Demanda/cap.</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+              <div class="case-pagination">
+                <button type="button" id="cases-prev">← Anteriores</button
+                ><span id="cases-page"></span
+                ><button type="button" id="cases-next">Siguientes →</button>
+              </div>
+            </section>
+          </div>
+          <section class="panel scope-panel" id="scope">
+            <p class="eyebrow">IDEALIZACIÓN Y ALCANCE</p>
+            <h2>Condiciones del análisis</h2>
+            <p class="reading-guide">
+              Estas condiciones delimitan los resultados. Un estado favorable corresponde a una
+              comprobación individual, no al cumplimiento global del edificio.
+            </p>
+            <dl class="model-conditions">
+              <div>
+                <dt>Análisis</dt>
+                <dd>Elástico · primer orden</dd>
+              </div>
+              <div>
+                <dt>Diafragmas</dt>
+                <dd>Rígidos en su plano</dd>
+              </div>
+              <div>
+                <dt>Apoyos</dt>
+                <dd>Empotramientos de base</dd>
+              </div>
+              <div>
+                <dt>Secciones</dt>
+                <dd>Uniformes</dd>
+              </div>
+              <div>
+                <dt>Acción lateral</dt>
+                <dd>FHE · torsión ±5 %</dd>
+              </div>
+              <div>
+                <dt>Resistencia a cortante</dt>
+                <dd>Vc = 0 · φ = 0,60</dd>
+              </div>
+            </dl>
+            <ul id="model-issues">
+              <li>Modelo de primer orden con idealización de barras y diafragmas rígidos.</li>
+            </ul>
+            <p>
+              Modelo elástico de barras 3D, bases empotradas, diafragmas rígidos y secciones
+              uniformes. Cargas de losa a 45°, peso propio de vigas descontando el espesor
+              equivalente de losa y peso de columnas. No incluye muros, cimentaciones, viento,
+              cargas de cubierta distintas, equipos ni escaleras no incorporados en las cargas
+              superficiales.
+            </p>
+            <p>
+              La sección se verifica por compatibilidad de deformaciones y flexión biaxial. El
+              cortante se contrasta conservadoramente con Vc = 0 y φ = 0,60. Los patrones discretos
+              de carga viva no representan todas las distribuciones posibles.
+            </p>
+            <p>
+              Referencias: NSR-10, títulos A (A.2, A.3, A.4 y A.6), B (B.2) y C (C.7, C.9, C.10,
+              C.11 y C.21), con modificaciones de los decretos 092 de 2011 y 340 de 2012.
+              <a
+                href="https://www.idrd.gov.co/sites/default/files/documentos/Construcciones/3titulo-c-nsr-100.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Consultar Título C ↗</a
+              >
+            </p>
+          </section>
+        </div>
+      </div>
+    </main>
+    <footer class="building-footer">
+      Espectra · NSR-10 · v0.5.0 · Juan Esteban Maya Rodriguez
+      <a href="https://github.com/Yojemr/Espectra-NSR10" target="_blank" rel="noopener noreferrer"
+        >Repositorio ↗</a
+      >
+    </footer>
+  </body>
+</html>
