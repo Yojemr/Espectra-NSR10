@@ -595,6 +595,171 @@
   grid-template-columns: 1fr 1fr;
   gap: 14px;
 }
+.interaction-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+.interaction-summary > div {
+  background: var(--surface-muted);
+  padding: 14px;
+  border-radius: 8px;
+}
+.interaction-summary span {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.interaction-summary strong {
+  font-family: Consolas, monospace;
+  font-size: 21px;
+}
+.interaction-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+  gap: 14px;
+  margin: 16px 0;
+}
+.interaction-controls label,
+.biaxial-controls label {
+  min-width: 0;
+}
+.interaction-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  font-size: 12px;
+  margin: 20px 0;
+}
+.interaction-legend span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.interaction-legend i {
+  display: inline-block;
+  width: 22px;
+  height: 3px;
+}
+.interaction-legend .legend-nominal {
+  background: var(--sd);
+}
+.interaction-legend .legend-design {
+  background: var(--danger-ink);
+}
+.interaction-legend .legend-demand-x,
+.interaction-legend .legend-demand-y {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--sa);
+}
+.interaction-legend .legend-demand-y {
+  background: var(--sv);
+}
+.interaction-views h3,
+.biaxial-view h3 {
+  font-size: 15px;
+  margin: 16px 0 10px;
+}
+.biaxial-view {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 24px;
+  margin-top: 26px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.biaxial-controls {
+  padding-top: 18px;
+}
+.biaxial-controls label {
+  margin-bottom: 14px;
+}
+.biaxial-controls .model-conditions {
+  grid-template-columns: 1fr;
+}
+.interaction-reference {
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+  margin-top: 18px;
+}
+.interaction-reference summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+.building-app svg .interaction-nominal {
+  stroke: var(--sd);
+  stroke-width: 2.5;
+  fill: none;
+}
+.building-app svg .interaction-design {
+  stroke: var(--danger-ink);
+  stroke-width: 2.5;
+  fill: none;
+}
+.building-app svg .interaction-demand-x {
+  fill: var(--white);
+  stroke: var(--sa);
+  stroke-width: 1.2;
+  opacity: 0.7;
+}
+.building-app svg .interaction-demand-y {
+  fill: var(--white);
+  stroke: var(--sv);
+  stroke-width: 1.2;
+  opacity: 0.7;
+}
+.building-app svg .interaction-selected {
+  fill: var(--white);
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+.building-app svg .interaction-contour {
+  fill: var(--surface-accent);
+  stroke: var(--danger-ink);
+  stroke-width: 2;
+}
+.building-app svg .interaction-ray {
+  stroke: var(--muted);
+  stroke-width: 1;
+  stroke-dasharray: 5 4;
+}
+.building-app svg .interaction-tick {
+  font-size: 14px;
+  font-family: Consolas, monospace;
+}
+.building-app svg .interaction-axis-label {
+  font-size: 15px;
+}
+.building-app svg .interaction-empty {
+  font-size: 20px;
+  fill: var(--danger-ink);
+}
+@media (max-width: 1000px) {
+  .interaction-views,
+  .interaction-controls,
+  .biaxial-view {
+    grid-template-columns: 1fr;
+  }
+  .biaxial-controls .model-conditions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 500px) {
+  .interaction-summary {
+    grid-template-columns: 1fr;
+  }
+  .building-app #interaction-panel svg .interaction-tick {
+    font-size: 20px;
+  }
+  .building-app #interaction-panel svg .interaction-axis-label {
+    font-size: 20px;
+  }
+}
 .building-app figure {
   margin: 0;
   min-width: 0;

@@ -423,7 +423,7 @@
     $('calculated-results').hidden = true;
     status('Calculando el pórtico, las combinaciones y la superficie biaxial…');
     try {
-      worker = new Worker('assets/structure-worker.js?v=0.5.0');
+      worker = new Worker('assets/structure-worker.js?v=0.5.1');
       worker.onmessage = (event) => {
         if (event.data.id !== request) return;
         worker.terminate();
@@ -606,12 +606,89 @@
       body.append(tr);
     }
   }
-  function interaction() {
+  function interaction(reset = false) {
     const name = $('interaction-regime').value,
-      available = V.interaction($('interaction-pm'), $('interaction-mm'), result, name);
-    $('interaction-caption').textContent = available
-      ? `${name} · corte a Pu = ${fmt(result.regimes[name].governing.d[0])} kN. Punto: momentos concurrentes de la combinación gobernante.`
-      : `${name} · no hay capacidad biaxial disponible al axial gobernante.`;
+      rows = result.regimes[name].cases,
+      selector = $('interaction-case');
+    if (reset || selector.dataset.regime !== name) {
+      selector.replaceChildren(
+        ...rows.map((c, i) => {
+          const option = el(
+            'option',
+            `${i === 0 ? 'Gobernante · ' : ''}${c.id} · ${c.end} · ${c.patternName}`,
+          );
+          option.value = i;
+          return option;
+        }),
+      );
+      selector.dataset.regime = name;
+      selector.value = '0';
+      $('interaction-cut-mode').value = 'case';
+    }
+    const caseIndex = Number(selector.value),
+      selected = rows[caseIndex],
+      d = selected.d;
+    const manual = $('interaction-cut-mode').value === 'manual';
+    $('interaction-axial').disabled = !manual;
+    if (!manual) $('interaction-axial').value = String(d[0]);
+    const axial =
+      $('interaction-axial').value.trim() === '' ? NaN : Number($('interaction-axial').value);
+    const view = V.interaction(
+      $('interaction-pm'),
+      $('interaction-pmy'),
+      $('interaction-mm'),
+      result,
+      name,
+      { caseIndex, window: $('interaction-window').value, axial },
+    );
+    for (const [i, id] of ['interaction-pm-caption', 'interaction-pmy-caption'].entries()) {
+      const v = view.pmResults[i];
+      $(id).textContent =
+        `${name} · ${v.total - v.outside} de ${v.total} proyecciones visibles${v.outside ? ` · ${v.outside} fuera de esta ventana` : ''}. ${v.selectedVisible ? 'Diamante: combinación destacada.' : 'Combinación destacada fuera de esta ventana.'}`;
+    }
+    const column = result.geometry.nodes.find((n) => n.id === project.selectedColumn);
+    $('interaction-summary').replaceChildren(
+      ...[
+        ['Compresión nominal P₀', fmt(result.sectionSurface.po, 0) + ' kN'],
+        ['Límite de diseño · 0,75 φP₀', fmt(result.interaction.pmax, 0) + ' kN'],
+        [
+          `Columna ${column.label} · piso ${project.selectedFloor} · Pu destacado`,
+          fmt(d[0], 0) + ' kN',
+        ],
+      ].map(([label, value]) => {
+        const box = el('div');
+        box.append(el('span', label), el('strong', value));
+        return box;
+      }),
+    );
+    $('interaction-axial-range').textContent =
+      `Intervalo resistente: ${fmt(result.interaction.pmin, 0)} a ${fmt(result.interaction.pmax, 0)} kN. X e Y usan la misma escala en el corte.`;
+    $('interaction-caption').textContent = !Number.isFinite(axial)
+      ? 'Axial sin valor numérico.'
+      : `${name} · Pu del corte = ${fmt(axial)} kN. ${!view.available ? 'Sin corte resistente a este axial.' : view.sameAxial ? 'Punto: Mux y Muy concurrentes de la combinación destacada.' : 'Corte de exploración; sin demanda de otro axial.'}`;
+    $('interaction-demand').replaceChildren(
+      ...[
+        ['Pu destacado', fmt(d[0]) + ' kN'],
+        ['Mux', fmt(d[1]) + ' kN·m'],
+        ['Muy', fmt(d[2]) + ' kN·m'],
+      ].map(([label, value]) => {
+        const box = el('div');
+        box.append(el('dt', label), el('dd', value));
+        return box;
+      }),
+    );
+    const states = result.interaction.diagrams;
+    $('interaction-states').tBodies[0].replaceChildren(
+      ...['x', 'y'].flatMap((axis) =>
+        states[axis].states.map((v) => {
+          const row = el('tr');
+          [axis.toUpperCase(), v.label, fmt(v.p, 0), fmt(v.m, 1), fmt(v.phi, 2)].forEach((value) =>
+            row.append(el('td', value)),
+          );
+          return row;
+        }),
+      ),
+    );
   }
   function joints() {
     const table = el('table'),
@@ -704,7 +781,7 @@
     facts();
     cards();
     detail();
-    interaction();
+    interaction(true);
     joints();
     forces();
     cases();
@@ -762,9 +839,27 @@
       $('view-3d').setAttribute('aria-pressed', String(!plan));
       drawModel();
     });
+  $('interaction-window').addEventListener('change', () => {
+    if (result) interaction();
+  });
+  $('interaction-case').addEventListener('change', () => {
+    if (result) {
+      $('interaction-cut-mode').value = 'case';
+      interaction();
+    }
+  });
+  $('interaction-cut-mode').addEventListener('change', () => {
+    if (result) {
+      if ($('interaction-cut-mode').value === 'manual') $('interaction-axial').value = '0';
+      interaction();
+    }
+  });
+  $('interaction-axial').addEventListener('input', () => {
+    if (result) interaction();
+  });
   for (const [id, callback] of [
     ['detail-regime', detail],
-    ['interaction-regime', interaction],
+    ['interaction-regime', () => interaction(true)],
     ['force-axis', forces],
     [
       'cases-regime',
