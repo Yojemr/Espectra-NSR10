@@ -449,6 +449,10 @@
 .building-app .table-scroll {
   overflow: auto;
   max-width: 100%;
+  max-height: none;
+}
+.building-app .cases-scroll {
+  max-height: 520px;
 }
 .building-app table {
   width: 100%;

@@ -12,6 +12,7 @@
 - Three.js local con versión fija, licencia y verificación reproducible; cálculo independiente del visor y alternativa SVG cuando WebGL 2 no está disponible.
 - Pruebas analíticas, de equilibrio y de regresión; límites explícitos de primer orden y verificaciones pendientes.
 - Desarrollo en rama, plantilla de PR, checks en ramas de trabajo y documentación del flujo de contribución.
+- Tablas de comprobaciones y fuerzas completas, unidades explícitas y metadatos de excentricidad diferenciados de los casos de solo gravedad.
 
 ## 0.4.0 — 2026-10-18
 

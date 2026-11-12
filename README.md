@@ -38,6 +38,8 @@ Accede desde la pestaña **Edificio y columnas** (`estructura.html`). Es una pri
 
 Un cambio de entradas marca los resultados anteriores y bloquea su exportación hasta recalcular. Los archivos importados se validan antes de sustituir el proyecto. Las capacidades faltantes se conservan como pendientes; un axial fuera del intervalo resistente no produce un contorno biaxial ficticio.
 
+En el CSV estructural, las excentricidades accidentales se expresan como fracción de la dimensión perpendicular: e de Ex / Ly y e de Ey / Lx. En combinaciones sin componente sísmica se exportan como cero. Los esfuerzos conservan sus signos y se expresan en kN y kN·m.
+
 ### Visores 3D
 
 El edificio completo permite **girar, acercar, desplazar y seleccionar una columna y un piso con un clic**. La selección actualiza el tramo analizado y su resaltado. El control **Losas** facilita ver el pórtico interior. La planta SVG conserva la lectura de ejes y paneles.

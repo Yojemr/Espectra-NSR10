@@ -552,6 +552,18 @@
       }),
     );
   }
+  function checkDescription({ label, value }) {
+    if (label.startsWith('Cuantía')) return 'ρ = ' + fmt(value * 100, 2) + ' %';
+    if (label.includes('Separación en') || label === 'Separación central')
+      return 's máx. = ' + fmt(value, 1) + ' mm';
+    if (label === 'Proporción de la sección') return 'Relación mínima = ' + fmt(value, 2);
+    if (label === 'Diámetro mínimo de estribo') return 'Diámetro mín. = ' + fmt(value, 1) + ' mm';
+    return 'Valor = ' + fmt(value, 2) + ' mm';
+  }
+  function accidental(c, axis) {
+    if (!c.sx && !c.sy) return 0;
+    return c[axis] ? 0.05 : -0.05;
+  }
   function detail() {
     const name = $('detail-regime').value,
       r = result.regimes[name];
@@ -574,12 +586,7 @@
         const td = el('td');
         if (c) {
           td.append(badge(c.pass ? 'Satisface' : 'No satisface', c.pass ? '' : 'fail'));
-          td.append(
-            el(
-              'small',
-              `${label.startsWith('Cuantía') ? 'ρ = ' + fmt(c.value * 100, 2) + ' %' : label.includes('Separación en') || label === 'Separación central' ? 's máx. = ' + fmt(c.value, 1) + ' mm' : fmt(c.value, 2)}`,
-            ),
-          );
+          td.append(el('small', checkDescription(c)));
         } else td.textContent = 'No aplica';
         tr.append(td);
       }
@@ -673,7 +680,7 @@
       first.append(
         el(
           'small',
-          `${c.id} · ${c.patternName} · Ex ${c.sx}, Ey ${c.sy}, tx ${c.tx ? ' +5%' : ' −5%'}, ty ${c.ty ? ' +5%' : ' −5%'}`,
+          `${c.id} · ${c.patternName} · ${c.sx || c.sy ? `Ex ${c.sx}, Ey ${c.sy}, e de Ex ${c.tx ? '+5%' : '−5%'}, e de Ey ${c.ty ? '+5%' : '−5%'}` : 'Sin componente sísmica'}`,
         ),
       );
       tr.append(first, el('td', c.end));
@@ -821,8 +828,8 @@
         'fl',
         'Ex',
         'Ey',
-        'Torsión X',
-        'Torsión Y',
+        'e accidental Ex / Ly',
+        'e accidental Ey / Lx',
         'Pu kN',
         'Mx kN m',
         'My kN m',
@@ -848,8 +855,8 @@
           c.fl,
           c.sx,
           c.sy,
-          c.tx ? 0.05 : -0.05,
-          c.ty ? 0.05 : -0.05,
+          accidental(c, 'tx'),
+          accidental(c, 'ty'),
           ...c.d,
           Number.isFinite(c.ratio) ? c.ratio : 'Fuera de capacidad',
           c.axial,
