@@ -44,7 +44,13 @@ En el CSV estructural, las excentricidades accidentales se expresan como fracci�
 
 El edificio completo permite **girar, acercar, desplazar y seleccionar una columna y un piso con un clic**. La selección actualiza el tramo analizado y su resaltado. El control **Losas** facilita ver el pórtico interior. La planta SVG conserva la lectura de ejes y paneles.
 
-La columna se representa en escala geométrica a partir de b, h, tramo libre, recubrimiento, diámetros, posiciones de barras, ramas y niveles de estribos del régimen DMO/DES seleccionado. Permite mostrar concreto sólido, transparente, abierto mediante un corte longitudinal u oculto. Las barras y los estribos se pueden ocultar por separado. La textura de concreto y el corrugado son ilustrativos; el corte es una herramienta de inspección, no una abertura del elemento. No se generan ganchos, anclajes ni empalmes sin un detalle definido.
+La columna se representa en escala geométrica a partir de b, h, tramo libre, recubrimiento, diámetros, posiciones de barras, ramas y niveles de estribos del régimen DMO/DES seleccionado. Permite mostrar concreto sólido, transparente, abierto mediante un corte longitudinal u oculto. Las barras y los estribos se pueden ocultar por separado. La textura de concreto y el corrugado son ilustrativos; el corte es una herramienta de inspección, no una abertura del elemento.
+
+El refuerzo transversal utiliza barras continuas con dobleces redondeados y ganchos de 135°, con extensión ≥ máx.(6dₜ, 75 mm), según C.7.1.4. El diámetro interior mínimo de doblado sigue C.7.2.2: 4dₜ para estribos No. 3 a No. 5 y 6dₜ para No. 6 a No. 8. La geometría también permite alojar la barra longitudinal abrazada. Las posiciones de las barras de esquina se ajustan a esos dobleces y se comparten entre cálculo, sección SVG y modelo 3D; el área de acero se conserva. Los cierres y ganchos suplementarios alternan entre niveles y se separan en altura para representar su montaje.
+
+La disposición implementada es un cerco perimetral con ganchos suplementarios apoyados en barras longitudinales: ramas X ≤ ny y ramas Y ≤ nx. Se rechazan disposiciones que no alojan los dobleces y extensiones dentro del recubrimiento. La geometría representada no verifica por sí sola anclajes, empalmes, interferencias de montaje ni todos los requisitos de apoyo lateral de barras.
+
+Las láminas de sección y alzado incluyen ejes, cotas de dimensiones, recubrimiento y longitud de confinamiento, unidades y llamadas del refuerzo. El ancho del alzado se amplifica para facilitar su lectura. Las claves breves explican los resultados en cada sección de la aplicación; las fórmulas y los valores se distinguen del texto auxiliar.
 
 - Ratón: arrastrar gira; rueda acerca; botón derecho y arrastre desplazan.
 - Táctil: un dedo gira; dos dedos permiten acercar y desplazar.
@@ -87,9 +93,9 @@ La sección inicial se conserva para estudiar el caso y **resulta insuficiente**
 - Cortante por capacidad: momentos nominales DMO y probables DES con 1,25fy; alternativa Ω0E donde corresponde. Resistencia conservadora con **Vc = 0, φ = 0,60** y el mayor espaciamiento editado. Si existen axiales fuera del intervalo resistente, Ve permanece pendiente.
 - Columna fuerte–viga débil: ΣMnc ≥ 1,2ΣMnb en cada dirección, usando axiales concurrentes de las columnas y la reversión más exigente de capacidades nominales de vigas suministradas.
 
-### Alcance pendiente para cerrar un diseño
+### Condiciones y alcance del análisis
 
-El análisis es de **primer orden**. Se muestran Q y Ax como diagnósticos; no se aplica automáticamente P-Δ ni amplificación Ax > 1 a los esfuerzos. Faltan el análisis de segundo orden y esbeltez local, justificación de diafragma y rigideces, evaluación completa de irregularidades, restricciones del sistema estructural según amenaza/uso/altura, exposición y durabilidad, ganchos y apoyo lateral de barras, empalmes, anclajes, tamaño de agregado, diseño de vigas y losas, cortante de nudos y cimentaciones.
+El análisis es de **primer orden**. Se muestran Q y Ax como diagnósticos; no se aplica automáticamente P-Δ ni amplificación Ax > 1 a los esfuerzos. El alcance no incluye análisis de segundo orden, esbeltez local, verificación de flexibilidad del diafragma, evaluación completa de irregularidades y restricciones del sistema según amenaza/uso/altura, exposición y durabilidad, comprobación completa del apoyo lateral de barras, empalmes, anclajes, tamaño de agregado, diseño de vigas y losas, cortante de nudos ni cimentaciones.
 
 La sección es uniforme en todo el edificio. No hay perfiles independientes por columna o piso, muros, resortes de apoyo, diafragmas flexibles ni análisis modal. Las familias de carga implementadas no incluyen viento, nieve, presión de suelo, fluidos o cargas especiales de cubierta. Estas cargas y otros elementos solo quedan representados si están debidamente incorporados a las entradas aplicables. Los siete patrones de carga viva no agotan todas las distribuciones posibles.
 
@@ -208,13 +214,14 @@ assets/app.js               Coordinación de la interfaz
 assets/style.css            Diseño adaptable y ambos modos
 assets/project.js           Esquema validado y geometría del proyecto
 assets/frame.js             Pórtico 3D, cargas, solución y equilibrio
+assets/reinforcement.js     Geometría compartida de barras, estribos y ganchos
 assets/section.js           Compatibilidad, interacción y detallado
 assets/building.js          FHE, combinaciones y comparación DMO/DES
 assets/structure-worker.js  Cálculo estructural fuera del hilo de interfaz
 assets/structure-ui.js      Entradas, proyectos y resultados estructurales
 assets/structure-view.js    Modelos y gráficas SVG estructurales
 assets/structure-3d.js      Visores WebGL interactivos y selección de elementos
-assets/vendor/three/       Biblioteca gráfica local y licencia MIT
+assets/vendor/three/        Biblioteca gráfica local y licencia MIT
 assets/structure.css        Interfaz adaptable del módulo estructural
 data/municipios.js          Catálogo normativo con trazabilidad
 tests/                      Pruebas numéricas y de casos
@@ -233,7 +240,7 @@ El archivo generado se mantiene fuera del formateador para conservar su reproduc
 
 ### Validación
 
-Las pruebas incluyen espectros y catálogo completo, compatibilidad de casos anteriores, oscilador, soluciones analíticas de barra/ménsula, equilibrio de cargas consistentes y reacciones globales, capacidad axial independiente, deformaciones y φ, flexión biaxial y convergencia angular, combinaciones y conservación de cargas gravitacionales entre DMO/DES, y regresiones de espaciamientos. La revisión de navegador cubre importación/exportación, datos inválidos, actualización del modelo, temas y vistas móviles.
+Las pruebas incluyen espectros y catálogo completo, compatibilidad de casos anteriores, oscilador, soluciones analíticas de barra/ménsula, equilibrio de cargas consistentes y reacciones globales, capacidad axial independiente, deformaciones y φ, flexión biaxial y convergencia angular, combinaciones y conservación de cargas gravitacionales entre DMO/DES, y regresiones de espaciamientos. La geometría de refuerzo se contrasta con radios mínimos, extensiones de ganchos, recubrimiento, ajuste de esquinas, simetría y profundidad efectiva. La revisión de navegador cubre importación/exportación, datos inválidos, actualización del modelo, temas y vistas móviles.
 
 ### Flujo de Git y GitHub
 

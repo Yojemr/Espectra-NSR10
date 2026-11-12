@@ -1,6 +1,6 @@
 # Historial de cambios
 
-## 0.5.0 — 2026-11-11
+## 0.5.0 — 2026-11-12
 
 - Módulo de edificio y columnas integrado con los espectros, partiendo de la planta del proyecto de Santa Marta.
 - Modelo 3D de pórticos, cargas consistentes, comprobación de equilibrio, FHE y comparación DMO/DES con combinaciones concurrentes.
@@ -13,6 +13,8 @@
 - Pruebas analíticas, de equilibrio y de regresión; límites explícitos de primer orden y verificaciones pendientes.
 - Desarrollo en rama, plantilla de PR, checks en ramas de trabajo y documentación del flujo de contribución.
 - Tablas de comprobaciones y fuerzas completas, unidades explícitas y metadatos de excentricidad diferenciados de los casos de solo gravedad.
+- Estribos continuos con dobleces y ganchos de 135°; posiciones de barras compartidas por cálculo y visores, con ajuste de esquinas al radio interior.
+- Láminas de planta, sección y alzado con cotas y ejes; claves de lectura en los dos módulos y jerarquía tipográfica para distinguir resultados de ayuda funcional.
 
 ## 0.4.0 — 2026-10-18
 
