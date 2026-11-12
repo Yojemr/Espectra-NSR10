@@ -106,7 +106,7 @@
   const groups = [
     [
       'Proyecto y sitio',
-      'El catálogo fija Aa y Av. El perfil C y el grupo I provienen del caso de trabajo; confirma su aplicabilidad al proyecto.',
+      'Aa y Av: catálogo NSR-10. Perfil de suelo y grupo de uso: entradas del proyecto.',
       [
         ['name', 'Nombre del proyecto', 'text'],
         ['site.code', 'Municipio', 'city'],
@@ -127,7 +127,7 @@
     ],
     [
       'Cargas y vigas',
-      'D superficial incluye losa y acabados. El motor añade vigas y columnas. El espesor equivalente se usa solo para evitar duplicar concreto de losa en vigas. Siete patrones discretos de L.',
+      'D superficial incluye losa y acabados. Vigas y columnas aportan peso propio adicional; el espesor equivalente evita duplicar concreto de losa en las vigas.',
       [
         ['dead', 'D superficial (kN/m²)'],
         ['live', 'L superficial (kN/m²)'],
@@ -139,7 +139,7 @@
     ],
     [
       'Materiales y rigidez',
-      'Ec = 4700√f′c (MPa), concreto de peso normal. Rigideces efectivas a flexión; la torsión de barras usa el mismo factor de la sección. Estos valores son hipótesis editables.',
+      'Concreto de peso normal y rigideces efectivas editables. La torsión de las barras utiliza el factor de su sección.',
       [
         ['fc', 'f′c (MPa)'],
         ['fy', 'fy longitudinal (MPa)'],
@@ -153,7 +153,7 @@
     ],
     [
       'Sección y barras',
-      'Dimensiones en mm. nx y ny son las barras por cara, incluyendo esquinas; las esquinas se cuentan una vez. Ramas X/Y: ramas efectivas paralelas al eje indicado, incluyendo estribo exterior.',
+      'Dimensiones en mm. nx y ny cuentan barras por cara, incluidas las esquinas. Un cerco exterior y ganchos suplementarios: ramas X ≤ ny y ramas Y ≤ nx. Las barras de esquina se ajustan al radio de doblado.',
       [
         ['section.b', 'b, dirección X (mm)'],
         ['section.h', 'h, dirección Y (mm)'],
@@ -179,7 +179,7 @@
     ],
     [
       'Confirmaciones del proyecto',
-      'El cálculo usa estas hipótesis aunque estén pendientes. Marcarlas registra su revisión por el usuario; no ejecuta una comprobación adicional.',
+      'Registro de las hipótesis adoptadas. El cálculo mantiene los apoyos y diafragmas indicados; las casillas no sustituyen verificaciones técnicas.',
       [
         ['assumptions.fixedBase', 'Bases empotradas justificadas', 'checkbox'],
         ['assumptions.rigidDiaphragm', 'Diafragma rígido justificado', 'checkbox'],
@@ -262,6 +262,10 @@
     const details = el('details');
     details.open = i < 2;
     details.append(el('summary', title), el('p', help, 'building-help'));
+    if (title === 'Materiales y rigidez')
+      details.append(el('p', 'Ec = 4700√f′c (MPa)', 'result-formula'));
+    if (title === 'Disipación e irregularidades')
+      details.append(el('p', 'R = φa · φp · φr · R₀', 'result-formula'));
     const grid = el('div', undefined, 'building-field-grid');
     for (const args of fields) field(...[args[0], args[1], args[2] || 'number', grid]);
     details.append(grid);
@@ -433,7 +437,7 @@
         page = 0;
         render();
         status(
-          `Cálculo actualizado · ${result.regimes.DMO.cases.length * 2} filas DMO/DES · equilibrio gravitacional verificado. Revisa el alcance antes de interpretar las comprobaciones.`,
+          `Cálculo actualizado · ${result.regimes.DMO.cases.length * 2} filas DMO/DES · equilibrio gravitacional verificado.`,
         );
       };
       worker.onerror = () => {

@@ -62,11 +62,11 @@
         <div>
           <p class="eyebrow">DEL SITIO A LA SECCIÓN</p>
           <h1>Un edificio.<br /><span>Dos niveles de disipación.</span></h1>
-          <p>Edita el proyecto de Santa Marta y compara DMO y DES sobre el mismo modelo.</p>
+          <p>Geometría, cargas y materiales compartidos para comparar DMO y DES.</p>
         </div>
         <div class="scope-tag">
           <strong>ANÁLISIS PRELIMINAR</strong><span>Pórtico 3D · primer orden · FHE</span
-          ><a href="#scope">Consultar alcance y verificaciones pendientes ↓</a>
+          ><a href="#scope">Condiciones del análisis ↓</a>
         </div>
       </section>
       <div class="building-tools" aria-label="Herramientas del proyecto">
@@ -84,6 +84,10 @@
       <div class="building-layout">
         <aside class="building-inputs panel">
           <h2>01 / Datos del proyecto</h2>
+          <p class="reading-guide">
+            El sitio define la amenaza; la geometría, las cargas y los materiales definen el modelo
+            resistente.
+          </p>
           <form id="building-form" novalidate></form>
         </aside>
         <div class="building-results" id="building-results">
@@ -98,6 +102,10 @@
                 ><button type="button" id="view-plan" aria-pressed="false">Planta</button>
               </div>
             </div>
+            <p class="reading-guide">
+              El tramo resaltado identifica la columna y el piso de los resultados. La planta
+              permite comprobar ejes y entrantes.
+            </p>
             <div class="model-selectors">
               <label>Columna<select id="column-select"></select></label
               ><label>Piso del tramo<select id="floor-select"></select></label
@@ -145,6 +153,10 @@
                 a la sección uniforme editada.
               </p>
               <div id="regime-cards" class="regime-cards"></div>
+              <p class="reading-guide">
+                Demanda/capacidad ≤ 1 indica resistencia suficiente para esa comprobación. DMO y DES
+                comparten gravedad; cambian R y el detallado.
+              </p>
             </section>
             <section class="panel">
               <div class="building-heading">
@@ -159,6 +171,10 @@
                   </select></label
                 >
               </div>
+              <p class="reading-guide">
+                As y ρ describen el acero longitudinal; l₀ y s describen el confinamiento. Cada
+                estado compara el valor adoptado con su límite.
+              </p>
               <div class="column-3d-panel">
                 <div class="building-heading">
                   <h3>Columna 3D interactiva</h3>
@@ -185,18 +201,16 @@
                 <div id="column-webgl" class="webgl-view column-webgl"></div>
                 <p id="column-3d-status" class="building-caption" role="status"></p>
                 <p class="building-caption">
-                  Arrastra para girar; rueda para acercar; botón derecho para desplazar. En pantalla
-                  táctil: un dedo para girar, dos para acercar o desplazar. Se muestra el tramo
-                  libre con barras y ramas rectas en su posición calculada. El corte abre el
-                  concreto para inspección; no representa una abertura real. Ganchos, anclajes y
-                  empalmes requieren un detalle posterior.
+                  Ratón: arrastre para girar, rueda para acercar y botón derecho para desplazar.
+                  Táctil: un dedo gira; dos acercan o desplazan. El corte de concreto es una vista
+                  de inspección.
                 </p>
               </div>
               <div class="section-views">
                 <figure>
                   <svg
                     id="column-section"
-                    viewBox="0 0 380 310"
+                    viewBox="0 0 500 430"
                     role="img"
                     aria-label="Sección de la columna con barras y ramas de estribos"
                   ></svg>
@@ -205,7 +219,7 @@
                 <figure>
                   <svg
                     id="column-elevation"
-                    viewBox="0 0 300 310"
+                    viewBox="0 0 360 430"
                     role="img"
                     aria-label="Elevación del tramo libre y zonas de confinamiento"
                   ></svg>
@@ -229,9 +243,9 @@
                 </table>
               </div>
               <p class="building-caption">
-                El esquema representa ramas y posiciones. Los ganchos, apoyos laterales de cada
-                barra, empalmes, tamaño de agregado y recubrimiento por exposición requieren detalle
-                constructivo.
+                Diámetros interiores de doblado según C.7.2; ganchos de 135° con extensión ≥
+                máx.(6dₜ, 75 mm), según C.7.1.4. Anclajes, empalmes y condiciones de exposición no
+                verificados.
               </p>
             </section>
             <section class="panel">
@@ -247,6 +261,10 @@
                   </select></label
                 >
               </div>
+              <p class="reading-guide">
+                El punto contiene esfuerzos concurrentes. Dentro del contorno hay resistencia
+                disponible al Pu indicado; fuera de él, la sección es insuficiente.
+              </p>
               <div class="interaction-views">
                 <figure>
                   <svg
@@ -281,6 +299,11 @@
                 capacidad nula.
               </p>
               <div id="joint-inputs" class="joint-inputs"></div>
+              <p class="result-formula">ΣMnc / (1,2 ΣMnb) ≥ 1,00</p>
+              <p class="reading-guide">
+                La relación compara columnas y vigas del mismo nudo. Un valor ≥ 1 satisface esta
+                comprobación; sin capacidades de viga no es evaluable.
+              </p>
               <div id="joint-results"></div>
               <p class="building-caption">
                 Se compara ΣMnc / (1,2 ΣMnb) ≥ 1, con capacidades de columnas evaluadas al axial
@@ -302,6 +325,10 @@
                 >
               </div>
               <p id="period-caption" class="building-caption"></p>
+              <p class="reading-guide">
+                Wi es el peso del nivel; Fi, su fuerza; Vi, el cortante acumulado. La deriva es
+                relativa al piso; Q &gt; 0,10 indica sensibilidad a segundo orden.
+              </p>
               <div class="table-scroll">
                 <table id="floor-forces">
                   <caption>
@@ -340,6 +367,10 @@
                 ordenados por demanda de sección. Efectos 100/30, signos y excentricidades
                 independientes; siete patrones de carga viva.
               </p>
+              <p class="reading-guide">
+                Cada fila conserva P, M y V de una misma combinación y extremo. Demanda/capacidad
+                &gt; 1 indica insuficiencia de la sección.
+              </p>
               <div class="table-scroll cases-scroll">
                 <table id="column-cases">
                   <caption>
@@ -369,10 +400,40 @@
             </section>
           </div>
           <section class="panel scope-panel" id="scope">
-            <p class="eyebrow">ALCANCE DE ESTA VERSIÓN</p>
-            <h2>Resultados con contexto</h2>
+            <p class="eyebrow">IDEALIZACIÓN Y ALCANCE</p>
+            <h2>Condiciones del análisis</h2>
+            <p class="reading-guide">
+              Estas condiciones delimitan los resultados. Un estado favorable corresponde a una
+              comprobación individual, no al cumplimiento global del edificio.
+            </p>
+            <dl class="model-conditions">
+              <div>
+                <dt>Análisis</dt>
+                <dd>Elástico · primer orden</dd>
+              </div>
+              <div>
+                <dt>Diafragmas</dt>
+                <dd>Rígidos en su plano</dd>
+              </div>
+              <div>
+                <dt>Apoyos</dt>
+                <dd>Empotramientos de base</dd>
+              </div>
+              <div>
+                <dt>Secciones</dt>
+                <dd>Uniformes</dd>
+              </div>
+              <div>
+                <dt>Acción lateral</dt>
+                <dd>FHE · torsión ±5 %</dd>
+              </div>
+              <div>
+                <dt>Resistencia a cortante</dt>
+                <dd>Vc = 0 · φ = 0,60</dd>
+              </div>
+            </dl>
             <ul id="model-issues">
-              <li>El análisis es preliminar y no constituye un diseño estructural cerrado.</li>
+              <li>Modelo de primer orden con idealización de barras y diafragmas rígidos.</li>
             </ul>
             <p>
               Modelo elástico de barras 3D, bases empotradas, diafragmas rígidos y secciones

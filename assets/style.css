@@ -1850,3 +1850,54 @@ select {
   background: var(--green);
   color: var(--on-action);
 }
+
+:root {
+  --support-ink: #5e6b62;
+}
+:root[data-theme='dark'] {
+  --support-ink: #a1afa5;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --support-ink: #a1afa5;
+  }
+}
+.reading-guide,
+.support-copy {
+  color: var(--support-ink);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.65;
+}
+.reading-guide {
+  margin: 10px 0 18px;
+  max-width: 85ch;
+}
+.inputs > .reading-guide,
+.chart-panel > .reading-guide {
+  margin-left: 19px;
+  margin-right: 19px;
+}
+.reading-guide::before {
+  content: 'Clave de lectura · ';
+  font-family: 'Segoe UI', Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+.result-formula {
+  font-family: Consolas, 'Cascadia Code', monospace;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  margin: 12px 0;
+}
+.field-note,
+.model-note,
+.oscillator-caption > p:not(.eyebrow),
+.case-toolbar-copy > p:not(.eyebrow) {
+  color: var(--support-ink);
+  font-family: Georgia, 'Times New Roman', serif;
+}

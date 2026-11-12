@@ -214,9 +214,57 @@
 .building-help,
 .building-caption,
 .building-app figcaption {
-  font-size: 12px;
+  font-size: 11.5px;
   line-height: 1.6;
-  color: var(--muted);
+  color: var(--support-ink);
+  font-family: Georgia, 'Times New Roman', serif;
+}
+.building-app .reading-guide {
+  font-size: 12px;
+}
+#section-caption,
+#ties-caption,
+#interaction-caption,
+#period-caption,
+#model-caption,
+#column-3d-status {
+  font-family: Consolas, 'Cascadia Code', monospace;
+  font-size: 12px;
+  color: var(--ink);
+}
+.regime-card dd,
+.building-fact strong {
+  font-family: Consolas, 'Cascadia Code', monospace;
+}
+.model-conditions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+.model-conditions div {
+  border-left: 2px solid var(--line);
+  padding-left: 12px;
+}
+.model-conditions dt {
+  font-size: 10px;
+  color: var(--support-ink);
+  margin-bottom: 4px;
+}
+.model-conditions dd {
+  font-size: 12px;
+  margin: 0;
+}
+.scope-panel p,
+.scope-panel li {
+  color: var(--support-ink);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 12px;
+}
+@media (max-width: 780px) {
+  .model-conditions {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 .building-help {
   margin: 8px 0 12px;
@@ -342,7 +390,116 @@
 .building-app svg .tie {
   fill: none;
   stroke: var(--sv);
-  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.building-app svg .tie-underlay {
+  fill: none;
+  stroke: var(--surface-muted);
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.building-app svg .tie-side {
+  fill: var(--sv);
+  stroke: var(--sv);
+  stroke-width: 0.6;
+}
+.building-app svg .longitudinal-side {
+  stroke: var(--sa);
+  stroke-linecap: round;
+}
+.building-app svg .drawing-border {
+  fill: var(--paper);
+  stroke: var(--line);
+}
+.building-app svg .drawing-title {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.building-app svg .drawing-unit {
+  font-size: 11px;
+  fill: var(--support-ink);
+}
+.building-app svg .drawing-axis {
+  stroke: var(--muted);
+  stroke-width: 0.8;
+  stroke-dasharray: 9 3 2 3;
+  opacity: 0.65;
+}
+.building-app svg .axis-label {
+  font-size: 17px;
+  font-style: italic;
+  font-weight: 600;
+}
+.building-app svg .dimension-line,
+.building-app svg .extension-line,
+.building-app svg .leader-line {
+  stroke: var(--muted);
+  stroke-width: 0.9;
+  fill: none;
+}
+.building-app svg .extension-line {
+  opacity: 0.65;
+}
+.building-app svg .dimension-fill {
+  fill: var(--muted);
+}
+.building-app svg .grid-bubble {
+  fill: var(--paper);
+  stroke: var(--muted);
+  stroke-width: 0.8;
+}
+.building-app svg .grid-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+.building-app svg .plan-column {
+  fill: var(--green);
+}
+.building-app svg .selected-column {
+  fill: var(--sa);
+  stroke: var(--sa);
+  stroke-width: 4;
+}
+.building-app svg .selected-label {
+  fill: var(--sa);
+  font-size: 15px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: var(--paper);
+  stroke-width: 3;
+}
+.building-app svg .dimension-label-bg {
+  fill: var(--paper);
+}
+.building-app svg .dimension-label {
+  font-family: Consolas, monospace;
+  font-size: 16px;
+  paint-order: stroke;
+  stroke: var(--paper);
+  stroke-width: 5px;
+  stroke-linejoin: round;
+}
+.building-app svg .drawing-callout {
+  font-size: 15px;
+}
+.building-app svg .drawing-rebar-label {
+  font-size: 15px;
+  font-weight: 600;
+}
+.building-app svg .drawing-subtitle {
+  font-size: 12px;
+  fill: var(--support-ink);
+}
+.building-app svg .confinement-zone {
+  fill: var(--surface-accent);
+  opacity: 0.65;
+}
+.building-app svg .zone-line {
+  stroke: var(--muted);
+  stroke-width: 0.7;
+  stroke-dasharray: 3 3;
 }
 .building-app svg .bar {
   fill: var(--sa);
@@ -428,7 +585,11 @@
   color: var(--warning-ink);
   background: var(--warning-bg);
 }
-.section-views,
+.section-views {
+  display: grid;
+  grid-template-columns: 500fr 360fr;
+  gap: 14px;
+}
 .interaction-views {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -510,7 +671,7 @@
 }
 .scope-panel p,
 .scope-panel li {
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.7;
 }
 .scope-panel ul {
@@ -577,6 +738,24 @@
   .section-views,
   .joint-inputs {
     grid-template-columns: 1fr;
+  }
+  .section-views svg .dimension-label {
+    font-size: 22px;
+  }
+  .section-views svg .drawing-title {
+    font-size: 19px;
+  }
+  .section-views svg .drawing-unit {
+    font-size: 14px;
+  }
+  .section-views svg .axis-label {
+    font-size: 23px;
+  }
+  .section-views svg .drawing-callout {
+    font-size: 20px;
+  }
+  .section-views svg .drawing-rebar-label {
+    font-size: 17px;
   }
   .building-heading {
     flex-wrap: wrap;

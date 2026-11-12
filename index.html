@@ -90,6 +90,10 @@
             <h2>Define el sitio</h2>
             <span class="small-tag">ENTRADAS</span>
           </div>
+          <p class="reading-guide">
+            Aa y Av definen la amenaza. El suelo modifica Fa/Fv; el grupo de uso fija la importancia
+            I.
+          </p>
           <form id="parameters-form" novalidate>
             <div class="segmented" aria-label="Origen de los parámetros">
               <button class="active" id="mode-city" type="button" aria-pressed="true">
@@ -241,11 +245,15 @@
               <span>MODELO</span><strong>Elástico <small>5 %</small></strong>
             </div>
           </div>
+          <p class="reading-guide">
+            T₀, TC y TL separan las ramas del espectro. Las curvas son elásticas, con 5 % de
+            amortiguamiento y sin reducción por R.
+          </p>
           <section class="case-toolbar panel" aria-labelledby="case-tools-heading">
             <div class="case-toolbar-copy">
-              <p class="eyebrow">TU TRABAJO, A MANO</p>
-              <h3 id="case-tools-heading">Guarda, abre y continúa.</h3>
-              <p>Conserva las entradas de tu caso o descarga los resultados.</p>
+              <p class="eyebrow">ARCHIVOS DEL CASO</p>
+              <h3 id="case-tools-heading">Guardar y recuperar</h3>
+              <p>JSON conserva las entradas; CSV contiene las ordenadas del espectro.</p>
             </div>
             <div class="case-actions">
               <button type="button" id="save-case" class="save-button">
@@ -287,6 +295,10 @@
                   </button>
                 </div>
               </div>
+              <p class="reading-guide">
+                Sa es la pseudoaceleración asociada a cada período T. La unidad g expresa una
+                fracción de la gravedad.
+              </p>
               <div id="chart-sa" class="chart" data-key="sa"></div>
             </div>
             <div class="secondary-charts">
@@ -310,6 +322,10 @@
                     </button>
                   </div>
                 </div>
+                <p class="reading-guide">
+                  Sv representa la pseudovelocidad de respuesta. Sus unidades son m/s; se evalúa con
+                  las expresiones propias de la NSR-10.
+                </p>
                 <div id="chart-sv" class="chart" data-key="sv"></div>
               </div>
               <div class="chart-panel panel">
@@ -335,6 +351,10 @@
                     </button>
                   </div>
                 </div>
+                <p class="reading-guide">
+                  Sd es el desplazamiento espectral. Describe la ordenada de un oscilador
+                  equivalente para cada período.
+                </p>
                 <div id="chart-sd" class="chart" data-key="sd"></div>
               </div>
             </div>
@@ -371,6 +391,10 @@
                 step="0.001"
                 aria-label="Período de consulta"
               />
+              <p class="reading-guide">
+                Las tres ordenadas corresponden al mismo período seleccionado. La sustitución
+                numérica muestra la rama normativa utilizada.
+              </p>
               <div class="inspection-grid">
                 <div class="readout sa-text">
                   <span>S<sub>a</sub></span
@@ -389,7 +413,10 @@
                     <p class="eyebrow">MODELO CONCEPTUAL</p>
                     <h4>Un grado de libertad</h4>
                     <strong id="model-period">T = 1,000 s</strong>
-                    <p>Esquema ilustrativo de masa y rigidez lateral.</p>
+                    <p class="reading-guide">
+                      La masa y la rigidez definen el período. La animación representa ese período,
+                      sin escala de desplazamiento real.
+                    </p>
                     <button id="oscillator-toggle" class="animation-button" type="button">
                       Pausar animación
                     </button>
@@ -419,6 +446,10 @@
               <summary>
                 <span>Tabla de ordenadas <small id="sample-count"></small></span><span>+</span>
               </summary>
+              <p class="reading-guide">
+                Cada fila reúne Sa, Sv y Sd para un mismo T. La tabla conserva unidades base aunque
+                cambie la unidad visible en una gráfica.
+              </p>
               <div class="table-scroll">
                 <table>
                   <thead>
@@ -458,6 +489,10 @@
           >
         </div>
         <div class="foundation-body">
+          <p class="reading-guide">
+            Las fórmulas se aplican por tramos. Los límites de período determinan qué expresión
+            corresponde a cada ordenada.
+          </p>
           <details open>
             <summary>Parámetros y períodos <span>−</span></summary>
             <p>

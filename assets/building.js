@@ -299,10 +299,10 @@
     const issues = [];
     if (!fheAllowed)
       issues.push(
-        'El caso no queda cubierto por la comprobación FHE implementada; requiere revisar el método de análisis de A.3.4.2.',
+        'Aplicabilidad FHE: caso fuera de la comprobación de elegibilidad implementada (A.3.4.2).',
       );
     if (Object.values(p.assumptions).some((v) => !v))
-      issues.push('Hay datos o hipótesis del proyecto pendientes de confirmar.');
+      issues.push('Registro de hipótesis: confirmación incompleta.');
     const maxAx = Math.max(
       ...Object.values(storeys)
         .flat()
@@ -310,14 +310,14 @@
     );
     if (maxAx > 1.001)
       issues.push(
-        `La evaluación preliminar exige revisar amplificación de torsión accidental Ax (hasta ${maxAx.toFixed(2)}) e irregularidad torsional. Las fuerzas mostradas usan Ax = 1.`,
+        `Torsión accidental: Ax estimado = ${maxAx.toFixed(2)}; esfuerzos calculados con Ax = 1, sin amplificación adicional.`,
       );
     issues.push(
-      'Análisis de primer orden. Falta cerrar P-Δ, esbeltez, rigidez del diafragma, materiales/exposición, anclajes y resistencia del nudo.',
+      'Efectos de segundo orden, esbeltez local, durabilidad, anclajes y resistencia del nudo: no verificados en este modelo.',
     );
     if (irregular)
       issues.push(
-        'La planta tiene entrantes. La idealización de diafragma rígido requiere justificación para el procedimiento de análisis adoptado.',
+        'Planta con entrantes; diafragma idealizado como rígido, sin verificación de flexibilidad en su plano.',
       );
     return {
       project: p,
