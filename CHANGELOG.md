@@ -1,5 +1,14 @@
 # Historial de cambios
 
+## 0.5.1 — 2026-11-12
+
+- Diagramas P–Mx y P–My con resistencia nominal, resistencia de diseño y demandas de todas las combinaciones; selección de combinación y ventana de resistencia.
+- Límite axial corregido a 0,75φP₀ para columnas con estribos, según C.10.3.6.2. El límite del caso inicial cambia de 1.960,24 a 1.837,72 kN; P₀ nominal y las cargas actuantes se conservan.
+- Intersección del contorno con el límite axial y extremos exactos de compresión y tracción puras.
+- Corte biaxial con igual escala en ambos ejes, axial editable para exploración y demandas superpuestas únicamente al mismo axial.
+- Tabla de estados nominales y φ por eje; comprobación independiente de fuerzas y momentos mediante equilibrio rectangular.
+- Recursos y dependencias del Web Worker identificados por versión para actualizar los cálculos publicados.
+
 ## 0.5.0 — 2026-11-12
 
 - Módulo de edificio y columnas integrado con los espectros, partiendo de la planta del proyecto de Santa Marta.
