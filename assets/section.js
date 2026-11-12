@@ -1,18 +1,10 @@
 (function (root) {
   'use strict';
   const clip = (x, a, b) => Math.max(a, Math.min(b, x));
+  const rebar =
+    root.EspectraRebar || (typeof require === 'function' ? require('./reinforcement.js') : null);
   function bars(s, catalog) {
-    const db = catalog[s.bar][0],
-      area = catalog[s.bar][1],
-      offset = s.cover + catalog[s.tie][0] + db / 2;
-    const x = s.b / 2 - offset,
-      y = s.h / 2 - offset,
-      out = [];
-    for (let i = 0; i < s.nx; i++)
-      for (const yy of [-y, y]) out.push({ x: -x + (2 * x * i) / (s.nx - 1), y: yy, area });
-    for (let i = 1; i < s.ny - 1; i++)
-      for (const xx of [-x, x]) out.push({ x: xx, y: -y + (2 * y * i) / (s.ny - 1), area });
-    return out;
+    return rebar.coordinates(s, catalog);
   }
   function polygon(s, nx, ny, threshold) {
     let p = [
@@ -174,7 +166,7 @@
       (((regime === 'DES' ? 0.3 : 0.2) * bc * p.fc) / fyt) * (Ag / Ach - 1),
       ((regime === 'DES' ? 0.09 : 0.06) * bc * p.fc) / fyt,
     );
-    const hx = Math.max((bc - dt) / (s.legsY - 1), (hc - dt) / (s.legsX - 1)),
+    const hx = rebar.layout(s, root.EspectraProject.BARS).hx,
       so = clip(100 + (350 - hx) / 3, 100, 150);
     const endLimit =
       regime === 'DES'
@@ -185,8 +177,12 @@
       regime === 'DES' ? Math.min(6 * db, 150) : Math.min(2 * s.sEnd, 16 * db, 48 * dt, s.b, s.h);
     const clearLength = (p.storyHeight - p.beamH) * 1000,
       lo = Math.max(s.b, s.h, clearLength / 6, regime === 'DES' ? 450 : 500);
-    const gapX = (s.b - 2 * (s.cover + dt + db / 2)) / (s.nx - 1) - db,
-      gapY = (s.h - 2 * (s.cover + dt + db / 2)) / (s.ny - 1) - db,
+    const gapX = Math.min(
+        ...steel.flatMap((a, i) =>
+          steel.slice(i + 1).map((b) => Math.hypot(a.x - b.x, a.y - b.y) - db),
+        ),
+      ),
+      gapY = gapX,
       minGap = Math.max(40, 1.5 * db);
     const zones =
       lo * 2 >= clearLength
@@ -269,8 +265,8 @@
       clearLength,
       ties: [...ties].sort((a, b) => a - b),
       checks,
-      dX: s.b - (s.cover + dt + db / 2),
-      dY: s.h - (s.cover + dt + db / 2),
+      dX: s.b / 2 + Math.max(...steel.map((v) => Math.abs(v.x))),
+      dY: s.h / 2 + Math.max(...steel.map((v) => Math.abs(v.y))),
       avX: s.legsX * at,
       avY: s.legsY * at,
     };

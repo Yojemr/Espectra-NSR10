@@ -392,21 +392,52 @@ export function create(host, { kind, onSelect, onStatus } = {}) {
     }
     ribs.instanceMatrix.needsUpdate = true;
     bars.add(ribs);
-    const xx = b / 2 - s.cover / 1000 - dt / 2,
-      zz = h / 2 - s.cover / 1000 - dt / 2;
-    for (const level of detail.ties) {
-      const y = level / 1000;
-      for (const z of [-zz, zz]) rod(ties, [-xx, y, z], [xx, y, z], dt, transverse);
-      for (const x of [-xx, xx]) rod(ties, [x, y, -zz], [x, y, zz], dt, transverse);
-      for (let i = 1; i < s.legsX - 1; i++) {
-        const z = -zz + (2 * zz * i) / (s.legsX - 1);
-        rod(ties, [-xx, y, z], [xx, y, z], dt, transverse);
+    const assemblies = [0, 1].map((index) =>
+      globalThis.EspectraRebar.layout(s, globalThis.EspectraProject.BARS, index).paths.map(
+        (path) => {
+          const curve = new T.CatmullRomCurve3(
+            path.points.map(([x, y, z]) => new T.Vector3(x / 1000, z / 1000, -y / 1000)),
+            false,
+            'centripetal',
+          );
+          return {
+            geometry: new T.TubeGeometry(
+              curve,
+              Math.max(120, path.points.length * 2),
+              dt / 2,
+              10,
+              false,
+            ),
+            ends: [0, 1].map((t) => ({
+              point: curve.getPointAt(t),
+              normal: curve.getTangentAt(t).multiplyScalar(t === 0 ? -1 : 1),
+            })),
+          };
+        },
+      ),
+    );
+    const caps = new T.InstancedMesh(
+      new T.CircleGeometry(dt / 2, 10),
+      transverse,
+      detail.ties.length * assemblies[0].length * 2,
+    );
+    const capTransform = new T.Object3D(),
+      capAxis = new T.Vector3(0, 0, 1);
+    let capIndex = 0;
+    detail.ties.forEach((level, index) => {
+      for (const assembly of assemblies[index % 2]) {
+        mesh(ties, assembly.geometry, transverse, 0, level / 1000, 0);
+        for (const end of assembly.ends) {
+          capTransform.position.copy(end.point);
+          capTransform.position.y += level / 1000;
+          capTransform.quaternion.setFromUnitVectors(capAxis, end.normal);
+          capTransform.updateMatrix();
+          caps.setMatrixAt(capIndex++, capTransform.matrix);
+        }
       }
-      for (let i = 1; i < s.legsY - 1; i++) {
-        const x = -xx + (2 * xx * i) / (s.legsY - 1);
-        rod(ties, [x, y, -zz], [x, y, zz], dt, transverse);
-      }
-    }
+    });
+    caps.instanceMatrix.needsUpdate = true;
+    ties.add(caps);
     ground(Math.max(b, h) * 4);
     key.shadow.camera.left = key.shadow.camera.bottom = -3;
     key.shadow.camera.right = key.shadow.camera.top = 3;
@@ -420,7 +451,7 @@ export function create(host, { kind, onSelect, onStatus } = {}) {
     host.dataset.depth = String(s.h);
     host.dataset.clearHeight = String(detail.clearLength);
     onStatus?.(
-      `${steel.length} barras No. ${s.bar} · ${detail.ties.length} niveles de estribos No. ${s.tie} · tramo libre ${detail.clearLength.toLocaleString('es-CO', { maximumFractionDigits: 2 })} mm. Corrugado superficial ilustrativo.`,
+      `${steel.length} barras No. ${s.bar} · ${detail.ties.length} niveles de estribos No. ${s.tie} · L libre = ${detail.clearLength.toLocaleString('es-CO', { maximumFractionDigits: 2 })} mm`,
     );
   }
   function configure(next = {}) {

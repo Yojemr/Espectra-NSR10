@@ -4,6 +4,7 @@ importScripts(
   'engine.js',
   'project.js',
   'frame.js',
+  'reinforcement.js',
   'section.js',
   'building.js',
 );
