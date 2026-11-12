@@ -8,7 +8,7 @@ Aplicación para explorar los espectros elásticos de **pseudoaceleración, pseu
 
 Funciona en GitHub Pages. El cálculo se ejecuta en el navegador; no requiere cuenta ni servidor de cálculo. El módulo de espectros también permite abrir `index.html` directamente. El módulo estructural usa un Web Worker y requiere GitHub Pages o un servidor HTTP local.
 
-**Versión del código: 0.5.0**. El sitio público corresponde a la última revisión integrada en `main`; una rama o pull request no cambia automáticamente la página publicada. La primera versión publicada corresponde a la versión interna 0.1.0.
+**Versión del código: 0.5.1**. El sitio público corresponde a la última revisión integrada en `main`; una rama o pull request no cambia automáticamente la página publicada. La primera versión publicada corresponde a la versión interna 0.1.0.
 
 ## Funciones
 
@@ -88,10 +88,20 @@ La sección inicial se conserva para estudiar el caso y **resulta insuficiente**
 - El peso sísmico se concentra por niveles; cada segmento de columna aporta la mitad a cada extremo. La mitad adyacente a la base fija no se incorpora a la masa elevada.
 - Fuerza horizontal equivalente (FHE): estimación estática de T mediante Rayleigh, límite Cu·Ta, distribución por Wi·hi^k, torsión inherente del modelo y excentricidad accidental ±5 %. Es una estimación de período, **no un análisis modal**. La comprobación de elegibilidad FHE es parcial y no sustituye revisar A.3.4.2 para el caso específico.
 - Combinaciones de resistencia implementadas: 1,4D; 1,2D+1,6L; 1,2D+L±E; 0,9D±E. E combina 100/30 con signos y excentricidades independientes. Se evalúan ambos extremos de columna y siete patrones discretos de L: uniforme, alternados por paneles X/Y y pisos. Solo E se divide por R = φaφpφrR0.
-- Sección rectangular con barras simétricas perimetrales: compatibilidad de deformaciones, εcu = 0,003, bloque equivalente, fluencia del acero, concreto desplazado por barras y φ según deformación de tracción. Superficie biaxial con 96 orientaciones y discretización de profundidad del eje neutro; corte al Pu concurrente y comprobación radial de momentos. Límite axial de columna con estribos: 0,80·0,65·Po.
+- Sección rectangular con barras simétricas perimetrales: compatibilidad de deformaciones, εcu = 0,003, bloque equivalente, fluencia del acero, concreto desplazado por barras y φ según deformación de tracción. Superficie biaxial con 96 orientaciones y discretización de profundidad del eje neutro; corte al Pu concurrente y comprobación radial de momentos. Límite axial de columna con estribos: 0,75·0,65·Po (C.10.3.6.2).
 - Detallado DMO/DES: cuantía, geometría, separación libre, recubrimiento interior base, diámetro de estribos, confinamiento y espaciamientos. Los resultados distinguen el espaciamiento geométrico del límite por área de refuerzo transversal.
 - Cortante por capacidad: momentos nominales DMO y probables DES con 1,25fy; alternativa Ω0E donde corresponde. Resistencia conservadora con **Vc = 0, φ = 0,60** y el mayor espaciamiento editado. Si existen axiales fuera del intervalo resistente, Ve permanece pendiente.
 - Columna fuerte–viga débil: ΣMnc ≥ 1,2ΣMnb en cada dirección, usando axiales concurrentes de las columnas y la reversión más exigente de capacidades nominales de vigas suministradas.
+
+### Diagramas de interacción
+
+La sección dispone de diagramas **P–Mx y P–My** independientes. Cada gráfico distingue la resistencia nominal `Pn–Mn`, la resistencia de diseño `φPn–φMn` y las proyecciones de las combinaciones concurrentes del régimen seleccionado. Los momentos se muestran en magnitud, dado el armado simétrico; los signos se conservan en el cálculo y en el corte biaxial. Las curvas de ambos ejes pueden coincidir en secciones cuadradas con el mismo armado por dirección.
+
+La ventana completa conserva todas las demandas. La ventana de detalle encuadra la resistencia e identifica cuántos puntos quedan fuera de ella. Seleccionar una combinación destaca sus proyecciones y actualiza el corte biaxial a su `Pu`. El corte Mx–My mantiene la misma escala en ambos ejes. La exploración de otro axial no superpone demandas con un `Pu` diferente; un axial fuera del intervalo resistente no genera un contorno ficticio.
+
+El límite para columnas con estribos es **φPn,max = 0,75·0,65·P₀**, según C.10.3.6.2, con `P₀ = [0,85f′c(Ag−As)+fyAs]/1000` en kN para entradas MPa/mm. La versión 0.5.1 corrige el coeficiente 0,80 usado en 0.5.0. Para la sección inicial, `P₀ = 3.769,6848 kN` y `φPn,max = 1.837,72134 kN`. El corte de la curva se obtiene por intersección con ese límite, sin trasladar puntos de mayor axial a una ordenada inferior. Los extremos de tracción y compresión puras tienen momento nulo.
+
+La tabla de estados muestra valores nominales y φ para cada eje. Las etiquetas y las tablas se redondean para facilitar la lectura; los cálculos y las comprobaciones conservan la precisión interna. Los cambios de pendiente de la curva de diseño responden al estado de deformación y a la variación de φ. Las comprobaciones uniaxiales por separado no reemplazan la verificación biaxial.
 
 ### Condiciones y alcance del análisis
 

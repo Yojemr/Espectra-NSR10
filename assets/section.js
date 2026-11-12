@@ -93,31 +93,85 @@
           ...{ nominalP: v.p, nominalMx: v.mx, nominalMy: v.my, phi: v.phi, epsT: v.epsT, c },
         };
       });
+      const endpoint = (p, compression) => {
+        const phi = design ? (compression ? 0.65 : 0.9) : 1;
+        return {
+          p: p * phi,
+          mx: 0,
+          my: 0,
+          nominalP: p,
+          nominalMx: 0,
+          nominalMy: 0,
+          phi,
+          epsT: compression ? 0 : Infinity,
+          c: compression ? null : 0,
+        };
+      };
+      curve.unshift(endpoint(pt, false));
+      curve.push(endpoint(po, true));
       curves.push(curve);
     }
     return {
       curves,
       po,
       pt,
-      pmax: design ? 0.8 * 0.65 * po : po,
+      pmax: design ? 0.75 * 0.65 * po : po,
       pmin: design ? 0.9 * pt : pt,
       design,
+      epsY: fy / es,
     };
+  }
+  function diagram(sf, axis) {
+    if (!['x', 'y'].includes(axis)) throw new Error('Eje de interacción inválido.');
+    const curve = sf.curves[axis === 'x' ? sf.curves.length / 4 : 0],
+      key = axis === 'x' ? 'mx' : 'my';
+    const outline = (ray, low, high) =>
+      [...new Set([low, 0, high, ...ray.map((v) => v.p).filter((p) => p >= low && p <= high)])]
+        .sort((a, b) => a - b)
+        .map((p) => ({ p, m: Math.abs(crossing(ray, p)[key]) }));
+    const nominal = outline(
+      curve.map((v) => ({ p: v.nominalP, mx: v.nominalMx, my: v.nominalMy })),
+      sf.pt,
+      sf.po,
+    );
+    const design = outline(curve, sf.pmin, sf.pmax);
+    nominal[0].m = 0;
+    nominal.at(-1).m = 0;
+    design[0].m = 0;
+    design.push({ p: sf.pmax, m: 0 });
+    const closest = (eps) =>
+      curve.reduce(
+        (best, v) => (Math.abs(v.epsT - eps) < Math.abs(best.epsT - eps) ? v : best),
+        curve[0],
+      );
+    const states = [
+      ['Tracción pura', curve[0]],
+      ['Límite de tracción εt = 0,005', closest(0.005)],
+      ['Estado balanceado', closest(sf.epsY)],
+      ['Compresión pura', curve.at(-1)],
+    ].map(([label, v]) => ({
+      label,
+      p: v.nominalP,
+      m: Math.abs(v[axis === 'x' ? 'nominalMx' : 'nominalMy']),
+      phi: v.phi,
+      epsT: v.epsT,
+    }));
+    return { axis, nominal, design, states, pmax: sf.pmax, po: sf.po, pt: sf.pt };
+  }
+  function crossing(curve, pu) {
+    for (let i = 1; i < curve.length; i++) {
+      const a = curve[i - 1],
+        b = curve[i];
+      if (a.p <= pu && b.p >= pu) {
+        const t = (pu - a.p) / (b.p - a.p || 1);
+        return { mx: a.mx + t * (b.mx - a.mx), my: a.my + t * (b.my - a.my) };
+      }
+    }
+    return { mx: 0, my: 0 };
   }
   function cut(s, pu) {
     if (pu > s.pmax + 1e-8 || pu < s.pmin - 1e-8) return null;
-    return s.curves.map((curve) => {
-      // Use the first crossing on the tension-to-compression branch.
-      for (let i = 1; i < curve.length; i++) {
-        const a = curve[i - 1],
-          b = curve[i];
-        if (a.p <= pu && b.p >= pu) {
-          const t = (pu - a.p) / (b.p - a.p || 1);
-          return { mx: a.mx + t * (b.mx - a.mx), my: a.my + t * (b.my - a.my) };
-        }
-      }
-      return { mx: 0, my: 0 };
-    });
+    return s.curves.map((curve) => crossing(curve, pu));
   }
   function radius(contour, mx, my) {
     const magnitude = Math.hypot(mx, my);
@@ -271,7 +325,7 @@
       avY: s.legsY * at,
     };
   }
-  const api = Object.freeze({ bars, point, surface, cut, radius, utilization, detailing });
+  const api = Object.freeze({ bars, point, surface, diagram, cut, radius, utilization, detailing });
   root.EspectraSection = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(globalThis);

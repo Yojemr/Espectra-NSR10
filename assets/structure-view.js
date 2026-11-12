@@ -396,81 +396,231 @@
         : 'e: extremos · c: centro · ancho amplificado',
     );
   }
-  function chart(target, xmin, xmax, ymin, ymax, xlabel, ylabel) {
-    target.replaceChildren();
-    const x = (v) => 65 + (350 * (v - xmin)) / (xmax - xmin),
-      y = (v) => 255 - (210 * (v - ymin)) / (ymax - ymin);
-    for (let i = 0; i <= 4; i++) {
-      const xv = xmin + ((xmax - xmin) * i) / 4,
-        yv = ymin + ((ymax - ymin) * i) / 4;
-      line(target, [x(xv), 45], [x(xv), 255], 'grid-line');
-      line(target, [65, y(yv)], [415, y(yv)], 'grid-line');
-      svg(target, 'text', { x: x(xv), y: 276, 'text-anchor': 'middle' }, fmt(xv, 0));
-      svg(target, 'text', { x: 58, y: y(yv) + 4, 'text-anchor': 'end' }, fmt(yv, 0));
-    }
-    if (xmin <= 0 && xmax >= 0) line(target, [x(0), 45], [x(0), 255], 'axis');
-    if (ymin <= 0 && ymax >= 0) line(target, [65, y(0)], [415, y(0)], 'axis');
-    svg(target, 'text', { x: 240, y: 301, 'text-anchor': 'middle' }, xlabel);
-    svg(target, 'text', { x: 65, y: 23 }, ylabel);
-    return { x, y };
+  function step(range, divisions = 5) {
+    const raw = Math.max(range, 1e-6) / divisions,
+      power = 10 ** Math.floor(Math.log10(raw));
+    return (
+      [1, 2, 2.5, 5, 10].reduce(
+        (best, v) => (Math.abs(v * power - raw) < Math.abs(best * power - raw) ? v : best),
+        1,
+      ) * power
+    );
   }
-  function interaction(pm, mm, r, regime) {
-    const demand = r.regimes[regime].governing.d,
-      curves = r.interaction.curves;
-    const points = curves.flat(),
-      maxM =
-        Math.max(
-          Math.abs(demand[1]),
-          Math.abs(demand[2]),
-          ...points.map((v) => Math.max(Math.abs(v.mx), Math.abs(v.my))),
-        ) * 1.12;
-    const maxP = Math.max(demand[0], r.interaction.pmax) * 1.12,
-      minP = Math.min(demand[0], r.interaction.pmin) * 1.15;
-    const a = chart(pm, -maxM, maxM, minP, maxP, 'φMn / Mu (kN·m)', 'φPn / Pu (kN)');
-    curves.forEach((curve, i) => {
-      for (const sign of [-1, 1])
-        svg(pm, 'polyline', {
-          points: curve
-            .map((v) =>
-              [a.x(sign * (i ? v.my : v.mx)), a.y(Math.min(v.p, r.interaction.pmax))].join(','),
-            )
-            .join(' '),
-          class: i ? 'curve-y' : 'curve-x',
-        });
-      svg(pm, 'circle', { cx: a.x(demand[i + 1]), cy: a.y(demand[0]), r: 5, class: 'demand' });
+  function chart(target, xmin, xmax, ymin, ymax, xlabel, square = false) {
+    target.replaceChildren();
+    const left = square ? 90 : 75,
+      right = square ? 390 : 470,
+      top = 45,
+      bottom = square ? 345 : 300;
+    target.setAttribute('viewBox', square ? '0 0 500 420' : '0 0 500 370');
+    const x = (v) => left + ((right - left) * (v - xmin)) / (xmax - xmin),
+      y = (v) => bottom - ((bottom - top) * (v - ymin)) / (ymax - ymin);
+    const ticks = (min, max) => {
+      const delta = step(max - min);
+      const out = [];
+      for (let v = Math.ceil(min / delta) * delta; v <= max + delta * 1e-8; v += delta)
+        out.push(Math.abs(v) < delta * 1e-8 ? 0 : v);
+      return out;
+    };
+    for (const v of ticks(xmin, xmax)) {
+      line(target, [x(v), top], [x(v), bottom], 'grid-line');
+      svg(
+        target,
+        'text',
+        { x: x(v), y: bottom + 23, 'text-anchor': 'middle', class: 'interaction-tick' },
+        fmt(v, 1),
+      );
+    }
+    for (const v of ticks(ymin, ymax)) {
+      line(target, [left, y(v)], [right, y(v)], 'grid-line');
+      svg(
+        target,
+        'text',
+        { x: left - 10, y: y(v) + 4, 'text-anchor': 'end', class: 'interaction-tick' },
+        fmt(v, 1),
+      );
+    }
+    if (xmin <= 0 && xmax >= 0) line(target, [x(0), top], [x(0), bottom], 'axis');
+    if (ymin <= 0 && ymax >= 0) line(target, [left, y(0)], [right, y(0)], 'axis');
+    svg(
+      target,
+      'text',
+      {
+        x: (left + right) / 2,
+        y: bottom + 53,
+        'text-anchor': 'middle',
+        class: 'interaction-axis-label',
+      },
+      xlabel,
+    );
+    svg(
+      target,
+      'text',
+      { x: left, y: 23, class: 'interaction-axis-label' },
+      square ? 'φMny / Muy (kN·m)' : 'P (kN) · compresión +',
+    );
+    const defs = svg(target, 'defs'),
+      id = target.id + '-clip';
+    svg(svg(defs, 'clipPath', { id }), 'rect', {
+      x: left - 4,
+      y: top - 4,
+      width: right - left + 8,
+      height: bottom - top + 8,
     });
-    svg(pm, 'text', { x: 300, y: 23 }, 'X continuo · Y trazos');
-    const cut = root.EspectraSection.cut(r.sectionSurface, demand[0]);
+    const plot = svg(target, 'g', { 'clip-path': 'url(#' + id + ')' });
+    return { x, y, plot, inside: (m, p) => m >= xmin && m <= xmax && p >= ymin && p <= ymax };
+  }
+  function curveLine(target, points, a, cls) {
+    return svg(target, 'polyline', {
+      points: points.map((v) => [a.x(v.m), a.y(v.p)].join(',')).join(' '),
+      class: cls,
+    });
+  }
+  function interaction(pmX, pmY, mm, r, regime, options = {}) {
+    const rows = r.regimes[regime].cases,
+      selected = rows[options.caseIndex || 0],
+      demand = selected.d;
+    const pmResults = [];
+    for (const [axis, target, index] of [
+      ['x', pmX, 1],
+      ['y', pmY, 2],
+    ]) {
+      const data = r.interaction.diagrams[axis],
+        all = options.window !== 'capacity';
+      const momentMax = Math.max(
+        ...data.nominal.map((v) => v.m),
+        ...(all ? rows.map((c) => Math.abs(c.d[index])) : [0]),
+      );
+      const pLow = Math.min(data.pt, ...(all ? rows.map((c) => c.d[0]) : [])),
+        pHigh = Math.max(data.po, ...(all ? rows.map((c) => c.d[0]) : []));
+      const dx = step(momentMax * 1.06),
+        dy = step((pHigh - pLow) * 1.06);
+      const a = chart(
+        target,
+        0,
+        Math.max(dx, Math.ceil((momentMax * 1.06) / dx) * dx),
+        Math.floor((pLow * 1.04) / dy) * dy,
+        Math.ceil((pHigh * 1.04) / dy) * dy,
+        'Momento |M' + axis + '| (kN·m)',
+      );
+      curveLine(a.plot, data.nominal, a, 'interaction-nominal');
+      curveLine(a.plot, data.design, a, 'interaction-design');
+      let outside = 0;
+      rows.forEach((c, i) => {
+        const m = Math.abs(c.d[index]),
+          p = c.d[0];
+        if (!a.inside(m, p)) {
+          outside++;
+          return;
+        }
+        const dot = svg(a.plot, 'circle', {
+          cx: a.x(m),
+          cy: a.y(p),
+          r: 2.7,
+          class: 'interaction-demand-' + axis,
+          'data-case': i,
+        });
+        svg(
+          dot,
+          'title',
+          {},
+          c.family +
+            ' · ' +
+            c.patternName +
+            ' · ' +
+            c.end +
+            ' · Pu=' +
+            fmt(p) +
+            ' kN · M' +
+            axis +
+            '=' +
+            fmt(c.d[index]) +
+            ' kN·m',
+        );
+      });
+      const m = Math.abs(demand[index]),
+        p = demand[0],
+        selectedVisible = a.inside(m, p);
+      if (selectedVisible) {
+        const x = a.x(m),
+          y = a.y(p),
+          marker = svg(a.plot, 'polygon', {
+            points: [
+              [x, y - 7],
+              [x + 7, y],
+              [x, y + 7],
+              [x - 7, y],
+            ]
+              .map((v) => v.join(','))
+              .join(' '),
+            class: 'interaction-selected',
+          });
+        svg(
+          marker,
+          'title',
+          {},
+          'Combinación destacada: Pu=' +
+            fmt(p) +
+            ' kN · M' +
+            axis +
+            '=' +
+            fmt(demand[index]) +
+            ' kN·m',
+        );
+      }
+      pmResults.push({ outside, total: rows.length, selectedVisible });
+    }
+    const axial = options.axial === undefined ? demand[0] : options.axial;
+    const sameAxial =
+      Number.isFinite(axial) &&
+      Math.abs(axial - demand[0]) <= 1e-7 * Math.max(1, Math.abs(demand[0]));
+    const cut = Number.isFinite(axial) ? root.EspectraSection.cut(r.sectionSurface, axial) : null;
     if (!cut) {
       mm.replaceChildren();
+      mm.setAttribute('viewBox', '0 0 500 420');
       svg(
         mm,
         'text',
-        { x: 240, y: 135, 'text-anchor': 'middle' },
-        'Pu excede el intervalo axial resistente.',
+        { x: 250, y: 160, 'text-anchor': 'middle', class: 'interaction-empty' },
+        Number.isFinite(axial) ? 'Pu fuera del intervalo resistente' : 'Introduce un axial válido',
       );
       svg(
         mm,
         'text',
-        { x: 240, y: 160, 'text-anchor': 'middle' },
-        'No existe un corte biaxial a este axial.',
+        { x: 250, y: 190, 'text-anchor': 'middle', class: 'interaction-axis-label' },
+        'No existe un corte resistente a este axial.',
       );
-      return false;
+      svg(
+        mm,
+        'text',
+        { x: 250, y: 222, 'text-anchor': 'middle', class: 'interaction-axis-label' },
+        'Intervalo: ' + fmt(r.interaction.pmin, 0) + ' a ' + fmt(r.interaction.pmax, 0) + ' kN',
+      );
+      return { pmResults, available: false, axial, sameAxial };
     }
-    const extent =
-      Math.max(
-        ...cut.flatMap((v) => [Math.abs(v.mx), Math.abs(v.my)]),
-        Math.abs(demand[1]),
-        Math.abs(demand[2]),
-      ) * 1.15 || 1;
-    const b = chart(mm, -extent, extent, -extent, extent, 'φMnx / Mux (kN·m)', 'φMny / Muy (kN·m)');
-    svg(mm, 'polygon', {
-      points: cut.map((v) => [b.x(v.mx), b.y(v.my)].join(',')).join(' '),
-      class: 'curve-x',
+    const maximum = Math.max(
+      ...cut.flatMap((v) => [Math.abs(v.mx), Math.abs(v.my)]),
+      ...(sameAxial ? [Math.abs(demand[1]), Math.abs(demand[2])] : [0]),
+      1,
+    );
+    const spacing = step(maximum * 1.1, 3),
+      extent = Math.ceil((maximum * 1.1) / spacing) * spacing;
+    const a = chart(mm, -extent, extent, -extent, extent, 'φMnx / Mux (kN·m)', true);
+    svg(a.plot, 'polygon', {
+      points: cut.map((v) => [a.x(v.mx), a.y(v.my)].join(',')).join(' '),
+      class: 'interaction-contour',
     });
-    line(mm, [b.x(0), b.y(0)], [b.x(demand[1]), b.y(demand[2])], 'curve-y');
-    svg(mm, 'circle', { cx: b.x(demand[1]), cy: b.y(demand[2]), r: 6, class: 'demand' });
-    return true;
+    if (sameAxial) {
+      line(a.plot, [a.x(0), a.y(0)], [a.x(demand[1]), a.y(demand[2])], 'interaction-ray');
+      const marker = svg(a.plot, 'circle', {
+        cx: a.x(demand[1]),
+        cy: a.y(demand[2]),
+        r: 6,
+        class: 'demand',
+      });
+      svg(marker, 'title', {}, 'Mux=' + fmt(demand[1]) + ' · Muy=' + fmt(demand[2]) + ' kN·m');
+    }
+    return { pmResults, available: true, axial, sameAxial };
   }
   root.EspectraView = Object.freeze({ fmt, model, section, elevation, interaction });
 })(globalThis);

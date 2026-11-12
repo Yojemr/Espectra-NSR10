@@ -13,18 +13,18 @@
     <script type="importmap">
       { "imports": { "three": "./assets/vendor/three/three.module.js" } }
     </script>
-    <script src="assets/theme.js?v=0.5.0"></script>
+    <script src="assets/theme.js?v=0.5.1"></script>
     <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="assets/style.css?v=0.5.0" />
-    <link rel="stylesheet" href="assets/structure.css?v=0.5.0" />
+    <link rel="stylesheet" href="assets/style.css?v=0.5.1" />
+    <link rel="stylesheet" href="assets/structure.css?v=0.5.1" />
     <script src="data/municipios.js" defer></script>
-    <script src="assets/engine.js?v=0.5.0" defer></script>
-    <script src="assets/cases.js?v=0.5.0" defer></script>
-    <script src="assets/project.js?v=0.5.0" defer></script>
-    <script src="assets/reinforcement.js?v=0.5.0" defer></script>
-    <script src="assets/section.js?v=0.5.0" defer></script>
-    <script src="assets/structure-view.js?v=0.5.0" defer></script>
-    <script src="assets/structure-ui.js?v=0.5.0" defer></script>
+    <script src="assets/engine.js?v=0.5.1" defer></script>
+    <script src="assets/cases.js?v=0.5.1" defer></script>
+    <script src="assets/project.js?v=0.5.1" defer></script>
+    <script src="assets/reinforcement.js?v=0.5.1" defer></script>
+    <script src="assets/section.js?v=0.5.1" defer></script>
+    <script src="assets/structure-view.js?v=0.5.1" defer></script>
+    <script src="assets/structure-ui.js?v=0.5.1" defer></script>
   </head>
   <body class="building-app">
     <noscript
@@ -41,7 +41,7 @@
       >
       <span class="top-caption">INGENIERÍA ESTRUCTURAL <span>/</span> COLOMBIA</span>
       <div class="top-actions">
-        <span class="version-badge">v0.5</span
+        <span class="version-badge">v0.5.1</span
         ><button type="button" id="theme-toggle" class="theme-toggle" hidden>
           <span id="theme-label">Modo oscuro</span></button
         ><a
@@ -248,7 +248,7 @@
                 verificados.
               </p>
             </section>
-            <section class="panel">
+            <section class="panel" id="interaction-panel">
               <div class="building-heading">
                 <div>
                   <p class="eyebrow">05 / INTERACCIÓN</p>
@@ -262,32 +262,111 @@
                 >
               </div>
               <p class="reading-guide">
-                El punto contiene esfuerzos concurrentes. Dentro del contorno hay resistencia
-                disponible al Pu indicado; fuera de él, la sección es insuficiente.
+                Azul: resistencia nominal. Rojo: resistencia de diseño, con φ y límite axial. Los
+                puntos son demandas de la columna y piso seleccionados. Cada proyección P–M es una
+                referencia uniaxial; la comprobación conjunta utiliza P, Mx y My concurrentes.
               </p>
+              <div id="interaction-summary" class="interaction-summary"></div>
+              <div class="interaction-controls">
+                <label
+                  >Ventana de las gráficas<select id="interaction-window">
+                    <option value="all">Resistencia y todas las demandas</option>
+                    <option value="capacity">Detalle de la resistencia</option>
+                  </select></label
+                >
+                <label>Combinación destacada<select id="interaction-case"></select></label>
+              </div>
+              <div class="interaction-legend" aria-label="Leyenda de interacción">
+                <span><i class="legend-nominal"></i>Nominal Pn–Mn</span>
+                <span><i class="legend-design"></i>Diseño φPn–φMn</span>
+                <span><i class="legend-demand-x"></i>Demandas (|Mux|, Pu)</span>
+                <span><i class="legend-demand-y"></i>Demandas (|Muy|, Pu)</span>
+                <span>◇ Combinación destacada</span>
+              </div>
               <div class="interaction-views">
                 <figure>
+                  <h3>Diagrama de interacción P–Mx</h3>
                   <svg
                     id="interaction-pm"
-                    viewBox="0 0 480 310"
+                    viewBox="0 0 500 370"
                     role="img"
-                    aria-label="Diagramas uniaxiales de resistencia de diseño y demanda gobernante"
+                    aria-label="Interacción sobre el eje X: resistencia nominal, de diseño y demandas de todas las combinaciones"
                   ></svg>
-                  <figcaption>
-                    Curvas uniaxiales de referencia φPn–φMn. La comprobación usa la superficie
-                    biaxial.
-                  </figcaption>
+                  <figcaption id="interaction-pm-caption"></figcaption>
                 </figure>
                 <figure>
+                  <h3>Diagrama de interacción P–My</h3>
+                  <svg
+                    id="interaction-pmy"
+                    viewBox="0 0 500 370"
+                    role="img"
+                    aria-label="Interacción sobre el eje Y: resistencia nominal, de diseño y demandas de todas las combinaciones"
+                  ></svg>
+                  <figcaption id="interaction-pmy-caption"></figcaption>
+                </figure>
+              </div>
+              <p class="building-caption">
+                P positivo: compresión; P negativo: tracción. Se representan magnitudes de momento
+                por la simetría del armado. Los diagramas X e Y coinciden cuando la sección y el
+                refuerzo son iguales en ambas direcciones.
+              </p>
+              <div class="biaxial-view">
+                <figure>
+                  <h3>Interacción biaxial Mx–My</h3>
                   <svg
                     id="interaction-mm"
-                    viewBox="0 0 480 310"
+                    viewBox="0 0 500 420"
                     role="img"
-                    aria-label="Corte de la superficie biaxial al esfuerzo axial de la combinación gobernante"
+                    aria-label="Corte de la superficie resistente biaxial con igual escala en ambos ejes"
                   ></svg>
                   <figcaption id="interaction-caption"></figcaption>
                 </figure>
+                <div class="biaxial-controls">
+                  <label
+                    >Axial del corte<select id="interaction-cut-mode">
+                      <option value="case">Pu de la combinación destacada</option>
+                      <option value="manual">Explorar otro axial</option>
+                    </select></label
+                  >
+                  <label
+                    >Pu del corte (kN)<input
+                      id="interaction-axial"
+                      type="number"
+                      step="any"
+                      disabled
+                  /></label>
+                  <p id="interaction-axial-range" class="building-caption"></p>
+                  <dl id="interaction-demand" class="model-conditions"></dl>
+                  <p class="reading-guide">
+                    En el corte de la combinación, el punto conserva sus momentos simultáneos:
+                    dentro del contorno hay resistencia disponible y fuera de él hay insuficiencia.
+                    Un axial que excede el intervalo resistente no tiene corte válido. La
+                    exploración usa el axial introducido y no superpone demandas de otro axial.
+                  </p>
+                </div>
               </div>
+              <details class="interaction-reference">
+                <summary>Estados de referencia del diagrama</summary>
+                <p class="reading-guide">
+                  Pn y Mn son nominales; φ depende de la deformación del acero. El límite de diseño
+                  para columnas con estribos es 0,75·0,65·P₀, según C.10.3.6.2. Las etiquetas se
+                  redondean sin redondear los cálculos internos.
+                </p>
+                <div class="table-scroll">
+                  <table id="interaction-states">
+                    <thead>
+                      <tr>
+                        <th>Eje</th>
+                        <th>Estado</th>
+                        <th>Pn (kN)</th>
+                        <th>Mn (kN·m)</th>
+                        <th>φ</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </details>
             </section>
             <section class="panel">
               <p class="eyebrow">06 / EQUILIBRIO DEL NUDO</p>
@@ -462,7 +541,7 @@
       </div>
     </main>
     <footer class="building-footer">
-      Espectra · NSR-10 · v0.5.0 · Juan Esteban Maya Rodriguez
+      Espectra · NSR-10 · v0.5.1 · Juan Esteban Maya Rodriguez
       <a href="https://github.com/Yojemr/Espectra-NSR10" target="_blank" rel="noopener noreferrer"
         >Repositorio ↗</a
       >
