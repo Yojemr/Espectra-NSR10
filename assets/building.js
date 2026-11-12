@@ -336,6 +336,7 @@
       fheAllowed,
       maxAx,
       interaction: {
+        diagrams: { x: S.diagram(design, 'x'), y: S.diagram(design, 'y') },
         curves: [design.curves[24], design.curves[0]],
         pmax: design.pmax,
         pmin: design.pmin,

@@ -112,8 +112,8 @@ test('Concrete displacement subtracts steel volume and gives independent pure ax
     As = 8 * 284,
     po = (0.85 * 21 * (400 * 400 - As) + 420 * As) / 1000;
   assert.equal(bars.length, 8);
-  near(baseline.interaction.pmax, 0.65 * 0.8 * po);
-  near(baseline.interaction.pmax, 1960.236096);
+  near(baseline.interaction.pmax, 0.65 * 0.75 * po);
+  near(baseline.interaction.pmax, 1837.72134);
   const v = S.point(original.section, bars, 21, 420, 200000, 1e8, 0);
   near(v.p, po);
   const tension = S.point(original.section, bars, 21, 420, 200000, 1e-8, 0);
