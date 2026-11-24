@@ -4,7 +4,7 @@
 
 Aplicación para explorar los espectros elásticos de **pseudoaceleración, pseudovelocidad y desplazamiento** de la NSR-10 y desarrollar un **modelo preliminar de edificio y columnas**, con comparación DMO/DES.
 
-**Autor:** Juan Esteban Maya Rodriguez.
+**Autor:** [Juan Esteban Maya · @Yojemr](https://github.com/Yojemr).
 
 Funciona en GitHub Pages. El cálculo se ejecuta en el navegador; no requiere cuenta ni servidor de cálculo. El módulo de espectros también permite abrir `index.html` directamente. El módulo estructural usa un Web Worker y requiere GitHub Pages o un servidor HTTP local.
 
